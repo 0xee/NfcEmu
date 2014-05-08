@@ -11,5 +11,5 @@ all build test:
 	$(MAKE) -C vhdl/sim $(MAKECMDGOALS)
 
 clean:
-	$(foreach s, $(SUBDIRS), $(MAKE) -C $(s) $(MAKECMDGOALS);)
+	$(foreach s, $(SUBDIRS) vhdl/sim, $(MAKE) -C $(s) $(MAKECMDGOALS);)
 	cd vhdl/sim; vhdmake -c
