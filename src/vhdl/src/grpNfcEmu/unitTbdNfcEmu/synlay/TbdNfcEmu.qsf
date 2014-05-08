@@ -1,0 +1,281 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2012 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II 32-bit
+# Version 12.0 Build 178 05/31/2012 SJ Web Edition
+# Date created = 12:49:43  June 08, 2013
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		TbdNfcEmu_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "Cyclone II"
+set_global_assignment -name DEVICE EP2C5T144C7
+set_global_assignment -name TOP_LEVEL_ENTITY TbdNfcEmu
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 12.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "12:49:43  JUNE 08, 2013"
+set_global_assignment -name LAST_QUARTUS_VERSION "13.0 SP1"
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name DEVICE_FILTER_PACKAGE TQFP
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 144
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 7
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_global_assignment -name GENERATE_RBF_FILE ON
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED WITH WEAK PULL-UP"
+set_global_assignment -name OUTPUT_PIN_LOAD 10 -section_id "3.3-V LVTTL"
+set_global_assignment -name OUTPUT_PIN_LOAD 10 -section_id "3.3-V LVCMOS"
+set_global_assignment -name OUTPUT_PIN_LOAD 10 -section_id "3.3-V PCI"
+set_global_assignment -name OUTPUT_PIN_LOAD 10 -section_id "3.3-V PCI-X"
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+
+
+
+set_location_assignment PIN_17 -to iFx2Clk
+set_location_assignment PIN_4 -to ioFx2Data[0]
+set_location_assignment PIN_7 -to ioFx2Data[1]
+set_location_assignment PIN_8 -to ioFx2Data[2]
+set_location_assignment PIN_9 -to ioFx2Data[3]
+set_location_assignment PIN_43 -to ioFx2Data[4]
+set_location_assignment PIN_42 -to ioFx2Data[5]
+set_location_assignment PIN_41 -to ioFx2Data[6]
+set_location_assignment PIN_40 -to ioFx2Data[7]
+set_location_assignment PIN_18 -to iFx2Flags[0]
+set_location_assignment PIN_21 -to iFx2Flags[1]
+set_location_assignment PIN_22 -to iFx2Flags[2]
+set_location_assignment PIN_32 -to onFx2DataOe
+set_location_assignment PIN_31 -to oFx2Wakeup
+set_location_assignment PIN_30 -to oFx2FifoAdr[0]
+set_location_assignment PIN_28 -to oFx2FifoAdr[1]
+set_location_assignment PIN_27 -to onFx2PktEnd
+set_location_assignment PIN_26 -to iFx2PA7
+set_location_assignment PIN_24 -to onFx2RdStrobe
+set_location_assignment PIN_25 -to onFx2WrStrobe
+#set_location_assignment PIN_92 -to oLed
+set_location_assignment PIN_92 -to oSDac1Ctrl
+set_location_assignment PIN_58 -to oSDac2Ctrl
+
+set_location_assignment PIN_143 -to oSecCon1
+set_location_assignment PIN_144 -to oSecCon2
+
+# xtal
+set_location_assignment PIN_88 -to iXtal1Clk
+set_location_assignment PIN_89 -to iXtal2Clk
+
+# adc 1
+set_location_assignment PIN_93 -to oAdc1Clk
+set_location_assignment PIN_94 -to iAdc1Data[0]
+set_location_assignment PIN_96 -to iAdc1Data[1]
+set_location_assignment PIN_97 -to iAdc1Data[2]
+set_location_assignment PIN_99 -to iAdc1Data[3]
+set_location_assignment PIN_100 -to iAdc1Data[4]
+set_location_assignment PIN_101 -to iAdc1Data[5]
+set_location_assignment PIN_103 -to iAdc1Data[6]
+set_location_assignment PIN_104 -to iAdc1Data[7]
+
+# dac 1
+set_location_assignment PIN_126 -to oDacClk
+
+set_location_assignment PIN_112 -to oDac1Out[0]
+set_location_assignment PIN_113 -to oDac1Out[1]
+set_location_assignment PIN_114 -to oDac1Out[2]
+set_location_assignment PIN_115 -to oDac1Out[3]
+set_location_assignment PIN_118 -to oDac1Out[4]
+set_location_assignment PIN_119 -to oDac1Out[5]
+set_location_assignment PIN_120 -to oDac1Out[6]
+set_location_assignment PIN_121 -to oDac1Out[7]
+set_location_assignment PIN_122 -to oDac1Out[8]
+set_location_assignment PIN_125 -to oDac1Out[9]
+
+
+
+#set_global_assignment -name ENABLE_SIGNALTAP ON
+#set_global_assignment -name USE_SIGNALTAP_FILE stp_tbd.stp
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+
+
+
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#set_global_assignment -name SLD_FILE /home/lukas/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/synlay/stp_tbd_auto_stripped.stp
+set_global_assignment -name SEARCH_PATH t51
+set_global_assignment -name SEARCH_PATH dsp
+set_global_assignment -name SEARCH_PATH misc
+set_global_assignment -name SEARCH_PATH nfcemu
+set_global_assignment -name SEARCH_PATH nfc
+set_global_assignment -name SEARCH_PATH global
+
+################################################################################
+# Global 
+################################################################################
+
+
+################################################################################
+# NFC 
+################################################################################
+
+
+
+################################################################################
+# Misc 
+################################################################################
+
+################################################################################
+# NfcEmu
+################################################################################
+
+
+################################################################################
+# DSP 
+################################################################################
+
+################################################################################
+# T51 
+################################################################################
+
+
+
+
+################################################################################
+# Periph 
+################################################################################
+
+
+
+
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
+set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
+set_global_assignment -name VHDL_FILE "../../../DCFifo-Rtl-ea.vhd"
+set_global_assignment -name VHDL_FILE ../../../alt_fifo_10x128.vhd
+set_global_assignment -name VHDL_FILE ../../../alt_fifo_8x32.vhd
+set_global_assignment -name VHDL_FILE "../../../grpPackages/pkgGlobal/src/Global-p.vhd" -library global
+set_global_assignment -name VHDL_FILE "../../../grpNfc/pkgNfc/src/Nfc-p.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/pkgIso14443/src/Iso14443-p.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitIso14443aPcdRx/src/Iso14443aPcdRx-e.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitIso14443aPcdRx/src/Iso14443aPcdRx-Rtl-a.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitIso14443_4/src/Iso14443_4-Rtl-ea.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitIso14443aPicc/src/Iso14443aPicc-Rtl-ea.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitIso14443aPiccRx/src/Iso14443aPiccRx-e.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitIso14443aPiccRx/src/Iso14443aPiccRx-Rtl-a.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitIso14443aPiccTx/src/Iso14443aPiccTx-e.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitIso14443aPiccTx/src/Iso14443aPiccTx-Rtl-a.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitIso14443aPiccLogic/src/Iso14443aPiccLogic-Rtl-ea.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitMillerDec/src/MillerDec-Rtl-ea.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitIso14443aFrameDecoder/src/FrameDecoder-Rtl-ea.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpNfc/unitCrcA/src/CrcA-Rtl-ea.vhd" -library nfc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitResetSynchronizer/src/ResetSynchronizer-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE ../../../grpMisc/unitDCFifo/src/GrayCounter.vhd -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitPacketEncoder/src/PacketEncoder-e.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitPacketEncoder/src/PacketEncoder-Rtl-a.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitPacketDecoder/src/PacketDecoder-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitPacketMux/src/PacketMux-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitPacketDecoder/src/PortBuffer-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitControlReg/src/ControlReg-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitStreamPacketizer/src/StreamPacketizer-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitSpikeFilter/src/SpikeFilter-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitFifo/src/Fifo-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitEdgeDetector/src/EdgeDetector-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitRxBuffer/src/RxBuffer-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitFwRam/src/FwRam-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitManchesterDecoder/src/ManchesterDecoder-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpMisc/unitStrobeGen/src/StrobeGen-Rtl-ea.vhd" -library misc
+set_global_assignment -name VHDL_FILE "../../../grpNfcEmu/pkgNfcEmu/src/NfcEmu-p.vhd" -library nfcemu
+set_global_assignment -name VHDL_FILE "../../../grpNfcEmu/unitTbdNfcEmu/src/TbdNfcEmu-e.vhd" -library nfcemu
+set_global_assignment -name VHDL_FILE "../src/TbdNfcEmu-Rtl-a.vhd" -library nfcemu
+set_global_assignment -name VHDL_FILE "../../../grpNfcEmu/unitNfcEmu/src/NfcEmu-e.vhd" -library nfcemu
+set_global_assignment -name VHDL_FILE "../../../grpNfcEmu/unitNfcEmu/src/NfcEmu-Rtl-a.vhd" -library nfcemu
+set_global_assignment -name VHDL_FILE "../../../grpNfcEmu/unitT51Wrapper/src/T51Wrapper-e.vhd" -library nfcemu
+set_global_assignment -name VHDL_FILE "../../../grpNfcEmu/unitT51Wrapper/src/T51Wrapper-Struct-a.vhd" -library nfcemu
+set_global_assignment -name VHDL_FILE "../../../grpNfcEmu/unitT51Interface/src/T51Interface-Rtl-ea.vhd" -library nfcemu
+set_global_assignment -name VHDL_FILE "../../../grpNfcEmu/unitProtocolProcessor/src/ProtocolProcessor-e.vhd" -library nfcemu
+set_global_assignment -name VHDL_FILE "../../../grpNfcEmu/unitProtocolProcessor/src/ProtocolProcessor-Rtl-a.vhd" -library nfcemu
+set_global_assignment -name VHDL_FILE "../../../grpDsp/unitDcBlock/src/DcBlock-Rtl-ea.vhd" -library dsp
+set_global_assignment -name VHDL_FILE "../../../grpDsp/pkgFilterCoefficients/src/FilterCoefficients-p.vhd" -library dsp
+set_global_assignment -name VHDL_FILE "../../../grpDsp/unitAmDemod/src/AmDemod-Rtl-ea.vhd" -library dsp
+set_global_assignment -name VHDL_FILE "../../../grpDsp/unitDigitalFir/src/DigitalFir-Rtl-ea.vhd" -library dsp
+set_global_assignment -name VHDL_FILE ../../../t51/T51_Pack.vhd -library t51
+set_global_assignment -name VHDL_FILE ../../../t51/SSRAM.vhd -library t51
+set_global_assignment -name VHDL_FILE ../../../t51/T51_ALU.vhd -library t51
+set_global_assignment -name VHDL_FILE ../../../t51/T51_Glue.vhd -library t51
+set_global_assignment -name VHDL_FILE ../../../t51/T51_MD.vhd -library t51
+set_global_assignment -name VHDL_FILE ../../../t51/T51_Port.vhd -library t51
+set_global_assignment -name VHDL_FILE ../../../t51/T51_RAM.vhd -library t51
+set_global_assignment -name VHDL_FILE ../../../t51/T51s.vhd -library t51
+set_global_assignment -name VHDL_FILE ../../../t51/T51.vhd -library t51
+set_global_assignment -name VHDL_FILE ../../../t51/T8052.vhd -library t51
+set_global_assignment -name VHDL_FILE "../../../grpPeriph/unitFx2FifoInterface/src/Fx2FifoInterface-e.vhd" -library periph
+set_global_assignment -name VHDL_FILE "../../../grpPeriph/unitFx2FifoInterface/src/Fx2FifoInterface-Rtl-a.vhd" -library periph
+set_global_assignment -name VHDL_FILE "../../../grpPeriph/unitAdcReadout/src/AdcReadout-e.vhd" -library periph
+set_global_assignment -name VHDL_FILE "../../../grpPeriph/unitAdcReadout/src/AdcReadout-Rtl-a.vhd" -library periph
+set_global_assignment -name VHDL_FILE "../../../grpPeriph/unitSerialDac/src/SerialDac-e.vhd" -library periph
+set_global_assignment -name VHDL_FILE "../../../grpPeriph/unitSerialDac/src/SerialDac-Rtl-a.vhd" -library periph
+set_global_assignment -name SDC_FILE TbdNfcEmu.sdc
+set_global_assignment -name QIP_FILE ../gensrc/nfc_pll.qip
+set_global_assignment -name QIP_FILE ../gensrc/cdc_fifo.qip
+set_global_assignment -name SLD_FILE /home/lukas/projects/NfcEmu/trunk/src/vhdl/src/grpNfcEmu/unitTbdNfcEmu/synlay/stp1_auto_stripped.stp
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

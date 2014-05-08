@@ -1,0 +1,10 @@
+clear all;
+close all;
+
+load scope_0.csv
+
+t = scope(:,1);
+d = scope(:,2);
+
+
+plot(d

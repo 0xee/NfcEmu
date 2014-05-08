@@ -1,0 +1,72 @@
+/**
+ * @file   NfcEmuPacket.h
+ * @author Lukas Schuller
+ * @date   Tue Aug 20 16:54:39 2013
+ * 
+ * @brief  
+ * 
+ */
+
+#ifndef NFCEMUPACKET_H
+#define NFCEMUPACKET_H
+
+#include <string>
+#include <vector>
+#include <iostream>
+#include <iterator>
+#include "NfcConstants.h"
+#include "UnitId.h"
+#include <memory>
+#include <deque>
+
+class NfcEmuPacket {
+
+    typedef std::vector<unsigned char> ByteVec;
+    
+public:
+    
+    typedef std::unique_ptr<NfcEmuPacket> Ptr;
+
+    static size_t constexpr dataOffset = 6;
+    enum Direction {eUp, eDown};
+    
+    static Ptr ExtractUp(std::deque<unsigned char> & buf);
+    static Ptr Down(UnitId const & id, ByteVec & content, size_t const ts = 0);
+
+   
+    void SetData(ByteVec & v) {
+        mData.swap(v);
+    }
+
+    size_t Size() const {
+        return mData.size();
+    }
+
+
+    UnitId Id() const { return unitId; }
+
+    double Ts() const { return (mTimeStamp*1000.0)/tsFreq; }
+
+    void PrintData(std::ostream & os = std::cout) const ;
+
+    std::string GetUnitName() const;
+    Direction Dir() const { return direction; }
+
+protected:
+    NfcEmuPacket(Direction const dir, UnitId const & id, size_t const ts,
+                 ByteVec & content);
+
+private:
+    NfcEmuPacket() : unitId(0) {}
+    UnitId unitId;
+    Direction direction;
+    ByteVec mData;
+    size_t mTimeStamp;
+
+    static size_t constexpr tsFreq = 27120000;
+
+};
+
+std::ostream & operator<<(std::ostream & os, NfcEmuPacket const & p);
+
+#endif 

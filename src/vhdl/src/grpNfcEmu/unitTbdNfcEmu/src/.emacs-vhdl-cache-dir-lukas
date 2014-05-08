@@ -1,0 +1,43 @@
+;; -*- Emacs-Lisp -*-
+
+;;; .emacs-vhdl-cache-dir-lukas - design hierarchy cache file for Emacs VHDL Mode 3.33.6
+
+;; Directory : "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/"
+;; Saved     : 2013-06-11 17:09:20 lukas
+
+
+;; version number
+(setq vhdl-cache-version "3.33.6")
+
+;; directory name
+(setq directory "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/")
+
+;; entity and architecture cache
+(aput 'vhdl-entity-alist directory '
+(("tbdnfcemu" "TbdNfcEmu" "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/TbdNfcEmu-Rtl-ea.vhd" 26 (("rtl" "Rtl" "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/TbdNfcEmu-Rtl-ea.vhd" 48 (("resetsynchronizer_1" "ResetSynchronizer_1" "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/TbdNfcEmu-Rtl-ea.vhd" 71 nil "resetsynchronizer" nil nil "work" nil) ("fx2fifointerface_1" "Fx2FifoInterface_1" "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/TbdNfcEmu-Rtl-ea.vhd" 79 nil "fx2fifointerface" nil nil "work" nil) ("sawtoothgen_1" "SawtoothGen_1" "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/TbdNfcEmu-Rtl-ea.vhd" 102 nil "sawtoothgen" nil nil "work" nil) ("serialdac_1" "SerialDac_1" "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/TbdNfcEmu-Rtl-ea.vhd" 116 nil "serialdac" nil nil "work" nil)) nil)) "rtl" (("ieee" . "numeric_std") ("ieee" . "std_logic_1164"))) ("tbtbdnfcemu" "tbTbdNfcEmu" "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/tbTbdNfcEmu-Bhv-ea.vhd" 27 (("bhv" "Bhv" "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/tbTbdNfcEmu-Bhv-ea.vhd" 33 (("dut" "DUT" "~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/tbTbdNfcEmu-Bhv-ea.vhd" 71 "TbdNfcEmu" "tbdnfcemu" nil nil nil nil)) nil)) "bhv" (("ieee" . "std_logic_1164"))))
+)
+
+;; configuration cache
+(aput 'vhdl-config-alist directory '
+nil
+)
+
+;; package cache
+(aput 'vhdl-package-alist directory '
+nil
+)
+
+;; instantiated entities cache
+(aput 'vhdl-ent-inst-alist directory '
+(("tbdnfcemu" "serialdac" "sawtoothgen" "fx2fifointerface" "resetsynchronizer"))
+)
+
+;; design units per file cache
+(aput 'vhdl-file-alist directory '
+(("~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/tbTbdNfcEmu-Bhv-ea.vhd" ("tbtbdnfcemu") ("bhv") ("tbtbdnfcemu") nil nil nil ("dut") ("tbdnfcemu")) ("~/projects/NfcEmu/trunk/src/vhdl/grpNfc/unitTbdNfcEmu/src/TbdNfcEmu-Rtl-ea.vhd" ("tbdnfcemu") ("rtl") ("tbdnfcemu") nil nil nil ("serialdac_1" "sawtoothgen_1" "fx2fifointerface_1" "resetsynchronizer_1") ("serialdac" "sawtoothgen" "fx2fifointerface" "resetsynchronizer")))
+)
+
+;; shown design units cache
+(aput 'vhdl-speedbar-shown-unit-alist directory '
+nil
+)

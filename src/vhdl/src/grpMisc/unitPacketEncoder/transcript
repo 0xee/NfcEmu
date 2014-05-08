@@ -1,0 +1,8 @@
+# do src/sim.do 
+# Copying /opt/altera/13.0sp1/modelsim_ase/linux/../modelsim.ini to modelsim.ini
+# Modifying modelsim.ini
+# ** Warning: Copied /opt/altera/13.0sp1/modelsim_ase/linux/../modelsim.ini to modelsim.ini.
+#          Updated modelsim.ini.
+# Modifying modelsim.ini
+# Modifying modelsim.ini
+# /home/lukas/projects/NfcEmu/trunk/src/vhdl/src/grpMisc/unitPacketEncoder

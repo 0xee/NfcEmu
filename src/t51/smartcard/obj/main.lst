@@ -1,0 +1,732 @@
+                              1 ;--------------------------------------------------------
+                              2 ; File Created by SDCC : free open source ANSI-C Compiler
+                              3 ; Version 3.3.0 #8604 (Sep  2 2013) (Linux)
+                              4 ; This file was generated Thu May  8 18:45:15 2014
+                              5 ;--------------------------------------------------------
+                              6 	.module main
+                              7 	.optsdcc -mmcs51 --model-small
+                              8 	
+                              9 ;--------------------------------------------------------
+                             10 ; Public variables in this module
+                             11 ;--------------------------------------------------------
+                             12 	.globl _main
+                             13 	.globl _DelayMs
+                             14 	.globl _Delay
+                             15 	.globl _IsoInit
+                             16 	.globl _IsoProcessPcd
+                             17 	.globl _SendDebug
+                             18 	.globl _PacketAvailable
+                             19 	.globl _GetRxCount
+                             20 	.globl _ResetRx
+                             21 	.globl _GetTxBuf
+                             22 	.globl _GetRx
+                             23 	.globl _SendPacket
+                             24 	.globl _IfInit
+                             25 	.globl _TF2
+                             26 	.globl _EXF2
+                             27 	.globl _RCLK
+                             28 	.globl _TCLK
+                             29 	.globl _EXEN2
+                             30 	.globl _TR2
+                             31 	.globl _C_T2
+                             32 	.globl _CP_RL2
+                             33 	.globl _T2CON_7
+                             34 	.globl _T2CON_6
+                             35 	.globl _T2CON_5
+                             36 	.globl _T2CON_4
+                             37 	.globl _T2CON_3
+                             38 	.globl _T2CON_2
+                             39 	.globl _T2CON_1
+                             40 	.globl _T2CON_0
+                             41 	.globl _PT2
+                             42 	.globl _ET2
+                             43 	.globl _CY
+                             44 	.globl _AC
+                             45 	.globl _F0
+                             46 	.globl _RS1
+                             47 	.globl _RS0
+                             48 	.globl _OV
+                             49 	.globl _F1
+                             50 	.globl _P
+                             51 	.globl _PS
+                             52 	.globl _PT1
+                             53 	.globl _PX1
+                             54 	.globl _PT0
+                             55 	.globl _PX0
+                             56 	.globl _RD
+                             57 	.globl _WR
+                             58 	.globl _T1
+                             59 	.globl _T0
+                             60 	.globl _INT1
+                             61 	.globl _INT0
+                             62 	.globl _TXD
+                             63 	.globl _RXD
+                             64 	.globl _P3_7
+                             65 	.globl _P3_6
+                             66 	.globl _P3_5
+                             67 	.globl _P3_4
+                             68 	.globl _P3_3
+                             69 	.globl _P3_2
+                             70 	.globl _P3_1
+                             71 	.globl _P3_0
+                             72 	.globl _EA
+                             73 	.globl _ES
+                             74 	.globl _ET1
+                             75 	.globl _EX1
+                             76 	.globl _ET0
+                             77 	.globl _EX0
+                             78 	.globl _P2_7
+                             79 	.globl _P2_6
+                             80 	.globl _P2_5
+                             81 	.globl _P2_4
+                             82 	.globl _P2_3
+                             83 	.globl _P2_2
+                             84 	.globl _P2_1
+                             85 	.globl _P2_0
+                             86 	.globl _SM0
+                             87 	.globl _SM1
+                             88 	.globl _SM2
+                             89 	.globl _REN
+                             90 	.globl _TB8
+                             91 	.globl _RB8
+                             92 	.globl _TI
+                             93 	.globl _RI
+                             94 	.globl _P1_7
+                             95 	.globl _P1_6
+                             96 	.globl _P1_5
+                             97 	.globl _P1_4
+                             98 	.globl _P1_3
+                             99 	.globl _P1_2
+                            100 	.globl _P1_1
+                            101 	.globl _P1_0
+                            102 	.globl _TF1
+                            103 	.globl _TR1
+                            104 	.globl _TF0
+                            105 	.globl _TR0
+                            106 	.globl _IE1
+                            107 	.globl _IT1
+                            108 	.globl _IE0
+                            109 	.globl _IT0
+                            110 	.globl _P0_7
+                            111 	.globl _P0_6
+                            112 	.globl _P0_5
+                            113 	.globl _P0_4
+                            114 	.globl _P0_3
+                            115 	.globl _P0_2
+                            116 	.globl _P0_1
+                            117 	.globl _P0_0
+                            118 	.globl _TH2
+                            119 	.globl _TL2
+                            120 	.globl _RCAP2H
+                            121 	.globl _RCAP2L
+                            122 	.globl _T2CON
+                            123 	.globl _B
+                            124 	.globl _ACC
+                            125 	.globl _PSW
+                            126 	.globl _IP
+                            127 	.globl _P3
+                            128 	.globl _IE
+                            129 	.globl _P2
+                            130 	.globl _SBUF
+                            131 	.globl _SCON
+                            132 	.globl _P1
+                            133 	.globl _TH1
+                            134 	.globl _TH0
+                            135 	.globl _TL1
+                            136 	.globl _TL0
+                            137 	.globl _TMOD
+                            138 	.globl _TCON
+                            139 	.globl _PCON
+                            140 	.globl _DPH
+                            141 	.globl _DPL
+                            142 	.globl _SP
+                            143 	.globl _P0
+                            144 	.globl _EchoMode
+                            145 	.globl _EchoCountMode
+                            146 	.globl _SmartcardMode
+                            147 ;--------------------------------------------------------
+                            148 ; special function registers
+                            149 ;--------------------------------------------------------
+                            150 	.area RSEG    (ABS,DATA)
+   0000                     151 	.org 0x0000
+                     0080   152 _P0	=	0x0080
+                     0081   153 _SP	=	0x0081
+                     0082   154 _DPL	=	0x0082
+                     0083   155 _DPH	=	0x0083
+                     0087   156 _PCON	=	0x0087
+                     0088   157 _TCON	=	0x0088
+                     0089   158 _TMOD	=	0x0089
+                     008A   159 _TL0	=	0x008a
+                     008B   160 _TL1	=	0x008b
+                     008C   161 _TH0	=	0x008c
+                     008D   162 _TH1	=	0x008d
+                     0090   163 _P1	=	0x0090
+                     0098   164 _SCON	=	0x0098
+                     0099   165 _SBUF	=	0x0099
+                     00A0   166 _P2	=	0x00a0
+                     00A8   167 _IE	=	0x00a8
+                     00B0   168 _P3	=	0x00b0
+                     00B8   169 _IP	=	0x00b8
+                     00D0   170 _PSW	=	0x00d0
+                     00E0   171 _ACC	=	0x00e0
+                     00F0   172 _B	=	0x00f0
+                     00C8   173 _T2CON	=	0x00c8
+                     00CA   174 _RCAP2L	=	0x00ca
+                     00CB   175 _RCAP2H	=	0x00cb
+                     00CC   176 _TL2	=	0x00cc
+                     00CD   177 _TH2	=	0x00cd
+                            178 ;--------------------------------------------------------
+                            179 ; special function bits
+                            180 ;--------------------------------------------------------
+                            181 	.area RSEG    (ABS,DATA)
+   0000                     182 	.org 0x0000
+                     0080   183 _P0_0	=	0x0080
+                     0081   184 _P0_1	=	0x0081
+                     0082   185 _P0_2	=	0x0082
+                     0083   186 _P0_3	=	0x0083
+                     0084   187 _P0_4	=	0x0084
+                     0085   188 _P0_5	=	0x0085
+                     0086   189 _P0_6	=	0x0086
+                     0087   190 _P0_7	=	0x0087
+                     0088   191 _IT0	=	0x0088
+                     0089   192 _IE0	=	0x0089
+                     008A   193 _IT1	=	0x008a
+                     008B   194 _IE1	=	0x008b
+                     008C   195 _TR0	=	0x008c
+                     008D   196 _TF0	=	0x008d
+                     008E   197 _TR1	=	0x008e
+                     008F   198 _TF1	=	0x008f
+                     0090   199 _P1_0	=	0x0090
+                     0091   200 _P1_1	=	0x0091
+                     0092   201 _P1_2	=	0x0092
+                     0093   202 _P1_3	=	0x0093
+                     0094   203 _P1_4	=	0x0094
+                     0095   204 _P1_5	=	0x0095
+                     0096   205 _P1_6	=	0x0096
+                     0097   206 _P1_7	=	0x0097
+                     0098   207 _RI	=	0x0098
+                     0099   208 _TI	=	0x0099
+                     009A   209 _RB8	=	0x009a
+                     009B   210 _TB8	=	0x009b
+                     009C   211 _REN	=	0x009c
+                     009D   212 _SM2	=	0x009d
+                     009E   213 _SM1	=	0x009e
+                     009F   214 _SM0	=	0x009f
+                     00A0   215 _P2_0	=	0x00a0
+                     00A1   216 _P2_1	=	0x00a1
+                     00A2   217 _P2_2	=	0x00a2
+                     00A3   218 _P2_3	=	0x00a3
+                     00A4   219 _P2_4	=	0x00a4
+                     00A5   220 _P2_5	=	0x00a5
+                     00A6   221 _P2_6	=	0x00a6
+                     00A7   222 _P2_7	=	0x00a7
+                     00A8   223 _EX0	=	0x00a8
+                     00A9   224 _ET0	=	0x00a9
+                     00AA   225 _EX1	=	0x00aa
+                     00AB   226 _ET1	=	0x00ab
+                     00AC   227 _ES	=	0x00ac
+                     00AF   228 _EA	=	0x00af
+                     00B0   229 _P3_0	=	0x00b0
+                     00B1   230 _P3_1	=	0x00b1
+                     00B2   231 _P3_2	=	0x00b2
+                     00B3   232 _P3_3	=	0x00b3
+                     00B4   233 _P3_4	=	0x00b4
+                     00B5   234 _P3_5	=	0x00b5
+                     00B6   235 _P3_6	=	0x00b6
+                     00B7   236 _P3_7	=	0x00b7
+                     00B0   237 _RXD	=	0x00b0
+                     00B1   238 _TXD	=	0x00b1
+                     00B2   239 _INT0	=	0x00b2
+                     00B3   240 _INT1	=	0x00b3
+                     00B4   241 _T0	=	0x00b4
+                     00B5   242 _T1	=	0x00b5
+                     00B6   243 _WR	=	0x00b6
+                     00B7   244 _RD	=	0x00b7
+                     00B8   245 _PX0	=	0x00b8
+                     00B9   246 _PT0	=	0x00b9
+                     00BA   247 _PX1	=	0x00ba
+                     00BB   248 _PT1	=	0x00bb
+                     00BC   249 _PS	=	0x00bc
+                     00D0   250 _P	=	0x00d0
+                     00D1   251 _F1	=	0x00d1
+                     00D2   252 _OV	=	0x00d2
+                     00D3   253 _RS0	=	0x00d3
+                     00D4   254 _RS1	=	0x00d4
+                     00D5   255 _F0	=	0x00d5
+                     00D6   256 _AC	=	0x00d6
+                     00D7   257 _CY	=	0x00d7
+                     00AD   258 _ET2	=	0x00ad
+                     00BD   259 _PT2	=	0x00bd
+                     00C8   260 _T2CON_0	=	0x00c8
+                     00C9   261 _T2CON_1	=	0x00c9
+                     00CA   262 _T2CON_2	=	0x00ca
+                     00CB   263 _T2CON_3	=	0x00cb
+                     00CC   264 _T2CON_4	=	0x00cc
+                     00CD   265 _T2CON_5	=	0x00cd
+                     00CE   266 _T2CON_6	=	0x00ce
+                     00CF   267 _T2CON_7	=	0x00cf
+                     00C8   268 _CP_RL2	=	0x00c8
+                     00C9   269 _C_T2	=	0x00c9
+                     00CA   270 _TR2	=	0x00ca
+                     00CB   271 _EXEN2	=	0x00cb
+                     00CC   272 _TCLK	=	0x00cc
+                     00CD   273 _RCLK	=	0x00cd
+                     00CE   274 _EXF2	=	0x00ce
+                     00CF   275 _TF2	=	0x00cf
+                            276 ;--------------------------------------------------------
+                            277 ; overlayable register banks
+                            278 ;--------------------------------------------------------
+                            279 	.area REG_BANK_0	(REL,OVR,DATA)
+   0000                     280 	.ds 8
+                            281 ;--------------------------------------------------------
+                            282 ; internal ram data
+                            283 ;--------------------------------------------------------
+                            284 	.area DSEG    (DATA)
+   0000                     285 _DelayMs_n_1_19:
+   0000                     286 	.ds 2
+                            287 ;--------------------------------------------------------
+                            288 ; overlayable items in internal ram 
+                            289 ;--------------------------------------------------------
+                            290 	.area	OSEG    (OVR,DATA)
+   0000                     291 _Delay_d_1_17:
+   0000                     292 	.ds 2
+                            293 ;--------------------------------------------------------
+                            294 ; Stack segment in internal ram 
+                            295 ;--------------------------------------------------------
+                            296 	.area	SSEG	(DATA)
+   0000                     297 __start__stack:
+   0000                     298 	.ds	1
+                            299 
+                            300 ;--------------------------------------------------------
+                            301 ; indirectly addressable internal ram data
+                            302 ;--------------------------------------------------------
+                            303 	.area ISEG    (DATA)
+                            304 ;--------------------------------------------------------
+                            305 ; absolute internal ram data
+                            306 ;--------------------------------------------------------
+                            307 	.area IABS    (ABS,DATA)
+                            308 	.area IABS    (ABS,DATA)
+                            309 ;--------------------------------------------------------
+                            310 ; bit data
+                            311 ;--------------------------------------------------------
+                            312 	.area BSEG    (BIT)
+                            313 ;--------------------------------------------------------
+                            314 ; paged external ram data
+                            315 ;--------------------------------------------------------
+                            316 	.area PSEG    (PAG,XDATA)
+                            317 ;--------------------------------------------------------
+                            318 ; external ram data
+                            319 ;--------------------------------------------------------
+                            320 	.area XSEG    (XDATA)
+                            321 ;--------------------------------------------------------
+                            322 ; absolute external ram data
+                            323 ;--------------------------------------------------------
+                            324 	.area XABS    (ABS,XDATA)
+                            325 ;--------------------------------------------------------
+                            326 ; external initialized ram data
+                            327 ;--------------------------------------------------------
+                            328 	.area XISEG   (XDATA)
+                            329 	.area HOME    (CODE)
+                            330 	.area GSINIT0 (CODE)
+                            331 	.area GSINIT1 (CODE)
+                            332 	.area GSINIT2 (CODE)
+                            333 	.area GSINIT3 (CODE)
+                            334 	.area GSINIT4 (CODE)
+                            335 	.area GSINIT5 (CODE)
+                            336 	.area GSINIT  (CODE)
+                            337 	.area GSFINAL (CODE)
+                            338 	.area CSEG    (CODE)
+                            339 ;--------------------------------------------------------
+                            340 ; interrupt vector 
+                            341 ;--------------------------------------------------------
+                            342 	.area HOME    (CODE)
+   0000                     343 __interrupt_vect:
+   0000 02r00r00      [24]  344 	ljmp	__sdcc_gsinit_startup
+                            345 ;--------------------------------------------------------
+                            346 ; global & static initialisations
+                            347 ;--------------------------------------------------------
+                            348 	.area HOME    (CODE)
+                            349 	.area GSINIT  (CODE)
+                            350 	.area GSFINAL (CODE)
+                            351 	.area GSINIT  (CODE)
+                            352 	.globl __sdcc_gsinit_startup
+                            353 	.globl __sdcc_program_startup
+                            354 	.globl __start__stack
+                            355 	.globl __mcs51_genXINIT
+                            356 	.globl __mcs51_genXRAMCLEAR
+                            357 	.globl __mcs51_genRAMCLEAR
+                            358 	.area GSFINAL (CODE)
+   0000 02r00r03      [24]  359 	ljmp	__sdcc_program_startup
+                            360 ;--------------------------------------------------------
+                            361 ; Home
+                            362 ;--------------------------------------------------------
+                            363 	.area HOME    (CODE)
+                            364 	.area HOME    (CODE)
+   0003                     365 __sdcc_program_startup:
+   0003 02r00r34      [24]  366 	ljmp	_main
+                            367 ;	return from main will return to caller
+                            368 ;--------------------------------------------------------
+                            369 ; code
+                            370 ;--------------------------------------------------------
+                            371 	.area CSEG    (CODE)
+                            372 ;------------------------------------------------------------
+                            373 ;Allocation info for local variables in function 'Delay'
+                            374 ;------------------------------------------------------------
+                            375 ;t                         Allocated to registers 
+                            376 ;d                         Allocated with name '_Delay_d_1_17'
+                            377 ;------------------------------------------------------------
+                            378 ;	main.c:10: void Delay(uint16_t const t) {
+                            379 ;	-----------------------------------------
+                            380 ;	 function Delay
+                            381 ;	-----------------------------------------
+   0000                     382 _Delay:
+                     0007   383 	ar7 = 0x07
+                     0006   384 	ar6 = 0x06
+                     0005   385 	ar5 = 0x05
+                     0004   386 	ar4 = 0x04
+                     0003   387 	ar3 = 0x03
+                     0002   388 	ar2 = 0x02
+                     0001   389 	ar1 = 0x01
+                     0000   390 	ar0 = 0x00
+   0000 85 82*00      [24]  391 	mov	_Delay_d_1_17,dpl
+   0003 85 83*01      [24]  392 	mov	(_Delay_d_1_17 + 1),dph
+                            393 ;	main.c:12: while(--d);
+   0006                     394 00101$:
+   0006 15*00         [12]  395 	dec	_Delay_d_1_17
+   0008 74 FF         [12]  396 	mov	a,#0xFF
+   000A B5*00 02      [24]  397 	cjne	a,_Delay_d_1_17,00109$
+   000D 15*01         [12]  398 	dec	(_Delay_d_1_17 + 1)
+   000F                     399 00109$:
+   000F E5*00         [12]  400 	mov	a,_Delay_d_1_17
+   0011 45*01         [12]  401 	orl	a,(_Delay_d_1_17 + 1)
+   0013 70 F1         [24]  402 	jnz	00101$
+   0015 22            [24]  403 	ret
+                            404 ;------------------------------------------------------------
+                            405 ;Allocation info for local variables in function 'DelayMs'
+                            406 ;------------------------------------------------------------
+                            407 ;ms                        Allocated to registers 
+                            408 ;n                         Allocated with name '_DelayMs_n_1_19'
+                            409 ;------------------------------------------------------------
+                            410 ;	main.c:15: void DelayMs(uint16_t const ms) {
+                            411 ;	-----------------------------------------
+                            412 ;	 function DelayMs
+                            413 ;	-----------------------------------------
+   0016                     414 _DelayMs:
+   0016 85 82*00      [24]  415 	mov	_DelayMs_n_1_19,dpl
+   0019 85 83*01      [24]  416 	mov	(_DelayMs_n_1_19 + 1),dph
+                            417 ;	main.c:17: while(--n) Delay(1820);
+   001C                     418 00101$:
+   001C 15*00         [12]  419 	dec	_DelayMs_n_1_19
+   001E 74 FF         [12]  420 	mov	a,#0xFF
+   0020 B5*00 02      [24]  421 	cjne	a,_DelayMs_n_1_19,00112$
+   0023 15*01         [12]  422 	dec	(_DelayMs_n_1_19 + 1)
+   0025                     423 00112$:
+   0025 E5*00         [12]  424 	mov	a,_DelayMs_n_1_19
+   0027 45*01         [12]  425 	orl	a,(_DelayMs_n_1_19 + 1)
+   0029 60 08         [24]  426 	jz	00104$
+   002B 90 07 1C      [24]  427 	mov	dptr,#0x071C
+   002E 12r00r00      [24]  428 	lcall	_Delay
+   0031 80 E9         [24]  429 	sjmp	00101$
+   0033                     430 00104$:
+   0033 22            [24]  431 	ret
+                            432 ;------------------------------------------------------------
+                            433 ;Allocation info for local variables in function 'main'
+                            434 ;------------------------------------------------------------
+                            435 ;mode                      Allocated to registers r7 
+                            436 ;------------------------------------------------------------
+                            437 ;	main.c:32: void main(void)
+                            438 ;	-----------------------------------------
+                            439 ;	 function main
+                            440 ;	-----------------------------------------
+   0034                     441 _main:
+                            442 ;	main.c:34: uint8_t mode = INVALID_MODE;
+   0034 7F FF         [12]  443 	mov	r7,#0xFF
+                            444 ;	main.c:35: P0 = 0x00;
+   0036 75 80 00      [24]  445 	mov	_P0,#0x00
+                            446 ;	main.c:37: IfInit();
+   0039 C0 07         [24]  447 	push	ar7
+   003B 12r00r00      [24]  448 	lcall	_IfInit
+   003E D0 07         [24]  449 	pop	ar7
+                            450 ;	main.c:39: while(mode == INVALID_MODE) {
+   0040                     451 00107$:
+   0040 BF FF 02      [24]  452 	cjne	r7,#0xFF,00137$
+   0043 80 03         [24]  453 	sjmp	00138$
+   0045                     454 00137$:
+   0045 02r00rDB      [24]  455 	ljmp	00109$
+   0048                     456 00138$:
+                            457 ;	main.c:40: while(!PacketAvailable(HOST));
+   0048                     458 00101$:
+   0048 75 82 00      [24]  459 	mov	dpl,#0x00
+   004B C0 07         [24]  460 	push	ar7
+   004D 12r00r00      [24]  461 	lcall	_PacketAvailable
+   0050 E5 82         [12]  462 	mov	a,dpl
+   0052 D0 07         [24]  463 	pop	ar7
+   0054 60 F2         [24]  464 	jz	00101$
+                            465 ;	main.c:41: if(GetRxCount(HOST) == 1) {
+   0056 75 82 00      [24]  466 	mov	dpl,#0x00
+   0059 C0 07         [24]  467 	push	ar7
+   005B 12r00r00      [24]  468 	lcall	_GetRxCount
+   005E AD 82         [24]  469 	mov	r5,dpl
+   0060 AE 83         [24]  470 	mov	r6,dph
+   0062 D0 07         [24]  471 	pop	ar7
+   0064 BD 01 45      [24]  472 	cjne	r5,#0x01,00105$
+   0067 BE 00 42      [24]  473 	cjne	r6,#0x00,00105$
+                            474 ;	main.c:42: mode = *GetRx(HOST);
+   006A 75 82 00      [24]  475 	mov	dpl,#0x00
+   006D 12r00r00      [24]  476 	lcall	_GetRx
+   0070 E0            [24]  477 	movx	a,@dptr
+   0071 FF            [12]  478 	mov	r7,a
+                            479 ;	main.c:43: TX_BUF[0] = RESP_OK;
+   0072 C0 07         [24]  480 	push	ar7
+   0074 12r00r00      [24]  481 	lcall	_GetTxBuf
+   0077 E4            [12]  482 	clr	a
+   0078 F0            [24]  483 	movx	@dptr,a
+                            484 ;	main.c:44: TX_BUF[1] = mode;
+   0079 12r00r00      [24]  485 	lcall	_GetTxBuf
+   007C E5 82         [12]  486 	mov	a,dpl
+   007E 85 83 F0      [24]  487 	mov	b,dph
+   0081 D0 07         [24]  488 	pop	ar7
+   0083 24 01         [12]  489 	add	a,#0x01
+   0085 F5 82         [12]  490 	mov	dpl,a
+   0087 E4            [12]  491 	clr	a
+   0088 35 F0         [12]  492 	addc	a,b
+   008A F5 83         [12]  493 	mov	dph,a
+   008C EF            [12]  494 	mov	a,r7
+   008D F0            [24]  495 	movx	@dptr,a
+                            496 ;	main.c:45: SendPacket(HOST, ID_CTRL, TX_BUF, 2);
+   008E C0 07         [24]  497 	push	ar7
+   0090 12r00r00      [24]  498 	lcall	_GetTxBuf
+   0093 85 82*00      [24]  499 	mov	_SendPacket_PARM_3,dpl
+   0096 85 83*01      [24]  500 	mov	(_SendPacket_PARM_3 + 1),dph
+   0099 75*00 61      [24]  501 	mov	_SendPacket_PARM_2,#0x61
+   009C 75*00 02      [24]  502 	mov	_SendPacket_PARM_4,#0x02
+   009F 75*01 00      [24]  503 	mov	(_SendPacket_PARM_4 + 1),#0x00
+   00A2 75 82 00      [24]  504 	mov	dpl,#0x00
+   00A5 12r00r00      [24]  505 	lcall	_SendPacket
+   00A8 D0 07         [24]  506 	pop	ar7
+   00AA 80 22         [24]  507 	sjmp	00106$
+   00AC                     508 00105$:
+                            509 ;	main.c:47: TX_BUF[0] = RESP_ERROR;
+   00AC C0 07         [24]  510 	push	ar7
+   00AE 12r00r00      [24]  511 	lcall	_GetTxBuf
+   00B1 74 01         [12]  512 	mov	a,#0x01
+   00B3 F0            [24]  513 	movx	@dptr,a
+                            514 ;	main.c:48: SendPacket(HOST, ID_CTRL, TX_BUF, 1);
+   00B4 12r00r00      [24]  515 	lcall	_GetTxBuf
+   00B7 85 82*00      [24]  516 	mov	_SendPacket_PARM_3,dpl
+   00BA 85 83*01      [24]  517 	mov	(_SendPacket_PARM_3 + 1),dph
+   00BD 75*00 61      [24]  518 	mov	_SendPacket_PARM_2,#0x61
+   00C0 75*00 01      [24]  519 	mov	_SendPacket_PARM_4,#0x01
+   00C3 75*01 00      [24]  520 	mov	(_SendPacket_PARM_4 + 1),#0x00
+   00C6 75 82 00      [24]  521 	mov	dpl,#0x00
+   00C9 12r00r00      [24]  522 	lcall	_SendPacket
+   00CC D0 07         [24]  523 	pop	ar7
+   00CE                     524 00106$:
+                            525 ;	main.c:50: ResetRx(HOST);
+   00CE 75 82 00      [24]  526 	mov	dpl,#0x00
+   00D1 C0 07         [24]  527 	push	ar7
+   00D3 12r00r00      [24]  528 	lcall	_ResetRx
+   00D6 D0 07         [24]  529 	pop	ar7
+   00D8 02r00r40      [24]  530 	ljmp	00107$
+   00DB                     531 00109$:
+                            532 ;	main.c:53: switch(mode) {
+   00DB BF 00 02      [24]  533 	cjne	r7,#0x00,00142$
+   00DE 80 0A         [24]  534 	sjmp	00110$
+   00E0                     535 00142$:
+   00E0 BF 01 02      [24]  536 	cjne	r7,#0x01,00143$
+   00E3 80 08         [24]  537 	sjmp	00111$
+   00E5                     538 00143$:
+                            539 ;	main.c:54: case ECHO_MODE:
+   00E5 BF 02 0B      [24]  540 	cjne	r7,#0x02,00114$
+   00E8 80 06         [24]  541 	sjmp	00112$
+   00EA                     542 00110$:
+                            543 ;	main.c:55: EchoMode();
+                            544 ;	main.c:56: break;
+                            545 ;	main.c:57: case ECHO_COUNT_MODE:
+   00EA 02r00rF4      [24]  546 	ljmp	_EchoMode
+   00ED                     547 00111$:
+                            548 ;	main.c:58: EchoCountMode();
+                            549 ;	main.c:59: break;
+                            550 ;	main.c:60: case SMARTCARD_MODE:
+   00ED 02r01r2C      [24]  551 	ljmp	_EchoCountMode
+   00F0                     552 00112$:
+                            553 ;	main.c:61: SmartcardMode();
+                            554 ;	main.c:63: }
+   00F0 02r01rE4      [24]  555 	ljmp	_SmartcardMode
+   00F3                     556 00114$:
+   00F3 22            [24]  557 	ret
+                            558 ;------------------------------------------------------------
+                            559 ;Allocation info for local variables in function 'EchoMode'
+                            560 ;------------------------------------------------------------
+                            561 ;x                         Allocated to registers r6 
+                            562 ;------------------------------------------------------------
+                            563 ;	main.c:67: void EchoMode() {
+                            564 ;	-----------------------------------------
+                            565 ;	 function EchoMode
+                            566 ;	-----------------------------------------
+   00F4                     567 _EchoMode:
+                            568 ;	main.c:70: while(!PacketAvailable(HOST));
+   00F4                     569 00101$:
+   00F4 75 82 00      [24]  570 	mov	dpl,#0x00
+   00F7 12r00r00      [24]  571 	lcall	_PacketAvailable
+   00FA E5 82         [12]  572 	mov	a,dpl
+   00FC 60 F6         [24]  573 	jz	00101$
+                            574 ;	main.c:71: x = GetRxCount(HOST);
+   00FE 75 82 00      [24]  575 	mov	dpl,#0x00
+   0101 12r00r00      [24]  576 	lcall	_GetRxCount
+   0104 AE 82         [24]  577 	mov	r6,dpl
+                            578 ;	main.c:72: SendPacket(HOST, ID_DEBUG, GetRx(HOST), x);
+   0106 75 82 00      [24]  579 	mov	dpl,#0x00
+   0109 C0 06         [24]  580 	push	ar6
+   010B 12r00r00      [24]  581 	lcall	_GetRx
+   010E 85 82*00      [24]  582 	mov	_SendPacket_PARM_3,dpl
+   0111 85 83*01      [24]  583 	mov	(_SendPacket_PARM_3 + 1),dph
+   0114 D0 06         [24]  584 	pop	ar6
+   0116 8E*00         [24]  585 	mov	_SendPacket_PARM_4,r6
+   0118 75*01 00      [24]  586 	mov	(_SendPacket_PARM_4 + 1),#0x00
+   011B 75*00 E1      [24]  587 	mov	_SendPacket_PARM_2,#0xE1
+   011E 75 82 00      [24]  588 	mov	dpl,#0x00
+   0121 12r00r00      [24]  589 	lcall	_SendPacket
+                            590 ;	main.c:73: ResetRx(HOST);            
+   0124 75 82 00      [24]  591 	mov	dpl,#0x00
+   0127 12r00r00      [24]  592 	lcall	_ResetRx
+   012A 80 C8         [24]  593 	sjmp	00101$
+                            594 ;------------------------------------------------------------
+                            595 ;Allocation info for local variables in function 'EchoCountMode'
+                            596 ;------------------------------------------------------------
+                            597 ;s                         Allocated to registers r6 r7 
+                            598 ;------------------------------------------------------------
+                            599 ;	main.c:77: void EchoCountMode() {
+                            600 ;	-----------------------------------------
+                            601 ;	 function EchoCountMode
+                            602 ;	-----------------------------------------
+   012C                     603 _EchoCountMode:
+                            604 ;	main.c:79: while(1) {
+   012C                     605 00107$:
+                            606 ;	main.c:80: s = 0;
+   012C 7E 00         [12]  607 	mov	r6,#0x00
+   012E 7F 00         [12]  608 	mov	r7,#0x00
+                            609 ;	main.c:81: while(!PacketAvailable(HOST)) {
+   0130                     610 00103$:
+   0130 75 82 00      [24]  611 	mov	dpl,#0x00
+   0133 C0 07         [24]  612 	push	ar7
+   0135 C0 06         [24]  613 	push	ar6
+   0137 12r00r00      [24]  614 	lcall	_PacketAvailable
+   013A E5 82         [12]  615 	mov	a,dpl
+   013C D0 06         [24]  616 	pop	ar6
+   013E D0 07         [24]  617 	pop	ar7
+                            618 ;	main.c:82: if(GetRxCount(HOST) == BUFSIZE-1) {
+   0140 70 3F         [24]  619 	jnz	00105$
+   0142 F5 82         [12]  620 	mov	dpl,a
+   0144 C0 07         [24]  621 	push	ar7
+   0146 C0 06         [24]  622 	push	ar6
+   0148 12r00r00      [24]  623 	lcall	_GetRxCount
+   014B AC 82         [24]  624 	mov	r4,dpl
+   014D AD 83         [24]  625 	mov	r5,dph
+   014F D0 06         [24]  626 	pop	ar6
+   0151 D0 07         [24]  627 	pop	ar7
+   0153 BC FF DA      [24]  628 	cjne	r4,#0xFF,00103$
+   0156 BD 00 D7      [24]  629 	cjne	r5,#0x00,00103$
+                            630 ;	main.c:83: s += GetRxCount(HOST);
+   0159 75 82 00      [24]  631 	mov	dpl,#0x00
+   015C C0 07         [24]  632 	push	ar7
+   015E C0 06         [24]  633 	push	ar6
+   0160 12r00r00      [24]  634 	lcall	_GetRxCount
+   0163 AC 82         [24]  635 	mov	r4,dpl
+   0165 AD 83         [24]  636 	mov	r5,dph
+   0167 D0 06         [24]  637 	pop	ar6
+   0169 D0 07         [24]  638 	pop	ar7
+   016B EC            [12]  639 	mov	a,r4
+   016C 2E            [12]  640 	add	a,r6
+   016D FE            [12]  641 	mov	r6,a
+   016E ED            [12]  642 	mov	a,r5
+   016F 3F            [12]  643 	addc	a,r7
+   0170 FF            [12]  644 	mov	r7,a
+                            645 ;	main.c:84: ResetRx(HOST);
+   0171 75 82 00      [24]  646 	mov	dpl,#0x00
+   0174 C0 07         [24]  647 	push	ar7
+   0176 C0 06         [24]  648 	push	ar6
+   0178 12r00r00      [24]  649 	lcall	_ResetRx
+   017B D0 06         [24]  650 	pop	ar6
+   017D D0 07         [24]  651 	pop	ar7
+   017F 80 AF         [24]  652 	sjmp	00103$
+   0181                     653 00105$:
+                            654 ;	main.c:88: s += GetRxCount(HOST);
+   0181 75 82 00      [24]  655 	mov	dpl,#0x00
+   0184 C0 07         [24]  656 	push	ar7
+   0186 C0 06         [24]  657 	push	ar6
+   0188 12r00r00      [24]  658 	lcall	_GetRxCount
+   018B AC 82         [24]  659 	mov	r4,dpl
+   018D AD 83         [24]  660 	mov	r5,dph
+   018F D0 06         [24]  661 	pop	ar6
+   0191 D0 07         [24]  662 	pop	ar7
+   0193 EC            [12]  663 	mov	a,r4
+   0194 2E            [12]  664 	add	a,r6
+   0195 FE            [12]  665 	mov	r6,a
+   0196 ED            [12]  666 	mov	a,r5
+   0197 3F            [12]  667 	addc	a,r7
+   0198 FF            [12]  668 	mov	r7,a
+                            669 ;	main.c:89: TX_BUF[0] = (s >> 8) & 0xFF;
+   0199 C0 07         [24]  670 	push	ar7
+   019B C0 06         [24]  671 	push	ar6
+   019D 12r00r00      [24]  672 	lcall	_GetTxBuf
+   01A0 D0 06         [24]  673 	pop	ar6
+   01A2 D0 07         [24]  674 	pop	ar7
+   01A4 8F 05         [24]  675 	mov	ar5,r7
+   01A6 ED            [12]  676 	mov	a,r5
+   01A7 F0            [24]  677 	movx	@dptr,a
+                            678 ;	main.c:90: TX_BUF[1] = s & 0xFF;
+   01A8 C0 07         [24]  679 	push	ar7
+   01AA C0 06         [24]  680 	push	ar6
+   01AC 12r00r00      [24]  681 	lcall	_GetTxBuf
+   01AF E5 82         [12]  682 	mov	a,dpl
+   01B1 85 83 F0      [24]  683 	mov	b,dph
+   01B4 D0 06         [24]  684 	pop	ar6
+   01B6 D0 07         [24]  685 	pop	ar7
+   01B8 24 01         [12]  686 	add	a,#0x01
+   01BA F5 82         [12]  687 	mov	dpl,a
+   01BC E4            [12]  688 	clr	a
+   01BD 35 F0         [12]  689 	addc	a,b
+   01BF F5 83         [12]  690 	mov	dph,a
+   01C1 EE            [12]  691 	mov	a,r6
+   01C2 F0            [24]  692 	movx	@dptr,a
+                            693 ;	main.c:91: SendPacket(HOST, ID_DEBUG, TX_BUF, 2); 
+   01C3 12r00r00      [24]  694 	lcall	_GetTxBuf
+   01C6 85 82*00      [24]  695 	mov	_SendPacket_PARM_3,dpl
+   01C9 85 83*01      [24]  696 	mov	(_SendPacket_PARM_3 + 1),dph
+   01CC 75*00 E1      [24]  697 	mov	_SendPacket_PARM_2,#0xE1
+   01CF 75*00 02      [24]  698 	mov	_SendPacket_PARM_4,#0x02
+   01D2 75*01 00      [24]  699 	mov	(_SendPacket_PARM_4 + 1),#0x00
+   01D5 75 82 00      [24]  700 	mov	dpl,#0x00
+   01D8 12r00r00      [24]  701 	lcall	_SendPacket
+                            702 ;	main.c:92: ResetRx(HOST);            
+   01DB 75 82 00      [24]  703 	mov	dpl,#0x00
+   01DE 12r00r00      [24]  704 	lcall	_ResetRx
+   01E1 02r01r2C      [24]  705 	ljmp	00107$
+                            706 ;------------------------------------------------------------
+                            707 ;Allocation info for local variables in function 'SmartcardMode'
+                            708 ;------------------------------------------------------------
+                            709 ;	main.c:97: void SmartcardMode() {
+                            710 ;	-----------------------------------------
+                            711 ;	 function SmartcardMode
+                            712 ;	-----------------------------------------
+   01E4                     713 _SmartcardMode:
+                            714 ;	main.c:98: IsoInit();
+   01E4 12r00r00      [24]  715 	lcall	_IsoInit
+                            716 ;	main.c:100: while(1) {
+   01E7                     717 00104$:
+                            718 ;	main.c:101: if(PacketAvailable(PICC)) {
+   01E7 75 82 01      [24]  719 	mov	dpl,#0x01
+   01EA 12r00r00      [24]  720 	lcall	_PacketAvailable
+   01ED E5 82         [12]  721 	mov	a,dpl
+   01EF 60 F6         [24]  722 	jz	00104$
+                            723 ;	main.c:102: IsoProcessPcd();
+   01F1 12r00r00      [24]  724 	lcall	_IsoProcessPcd
+                            725 ;	main.c:104: SendDebug(D_PACKET_PROCESSED);
+   01F4 75 82 0B      [24]  726 	mov	dpl,#0x0B
+   01F7 12r00r00      [24]  727 	lcall	_SendDebug
+   01FA 80 EB         [24]  728 	sjmp	00104$
+                            729 	.area CSEG    (CODE)
+                            730 	.area CONST   (CODE)
+                            731 	.area XINIT   (CODE)
+                            732 	.area CABS    (ABS,CODE)

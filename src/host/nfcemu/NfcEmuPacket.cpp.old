@@ -1,0 +1,123 @@
+/**
+ * @file   NfcEmuPacket.cpp
+ * @author Lukas Schuller
+ * @date   Tue Aug 20 16:57:41 2013
+ * 
+ * @brief  
+ * 
+ */
+
+#include "NfcEmuPacket.h"
+#include <string>
+#include <iterator>
+#include <iomanip>
+#include <sstream>
+
+using namespace std;
+using namespace boost::asio;
+
+unique_ptr<NfcEmuPacket> NfcEmuPacket::Down(UnitId const & id,
+                                         boost::asio::const_buffer const & data) {
+    return unique_ptr<NfcEmuPacket>(new NfcEmuPacket(eDown, id, 0, data));
+}
+
+NfcEmuPacket::NfcEmuPacket(NfcEmuPacket::Direction const dir,
+                           UnitId const & id, size_t const ts,
+                           ByteVec & content) :
+        unitId(id), mTimeStamp(ts), 
+        direction(dir) {
+ 
+    SetData(content);
+}
+
+
+void NfcEmuPacket::PrintData(ostream & os) const {
+    os << hex << setw(2) << setfill('0') << right;
+    for(auto ii = Begin(); ii != End(); ++ii) {
+        os << setw(2) << static_cast<int>(*ii) << "  ";
+    }
+    os << dec << setfill(' ') ;
+}
+
+string NfcEmuPacket::GetUnitName() const {
+    return unitId.Name();
+}
+
+NfcEmuPacket::Ptr NfcEmuPacket::ExtractUp(std::deque<unsigned char> & buf) {
+    // skip bytes until start byte appears
+    size_t skip = 0;    
+    while(buf.front() != NFC_START) {        
+        buf.pop_front();
+        ++skip;
+    } 
+    if(skip) cout << ":: Skipped " << skip << " bytes in rx stream" << endl;
+    
+    if(!buf.size()) return nullptr;
+
+    
+
+    UnitId id(buf.front());
+    buf.pop_front();
+    size_t ts = 0;
+
+    for(int i = 0; i < nfcTimeStampSize; ++i) {
+        if(!buf.size()) return nullptr;
+        ts <<= 8;
+        td += (size_t)buf.front();
+        buf.pop_front();
+    }
+
+    // look for dle/stop combination
+    bool escaped = false;
+    auto it = buf.begin();
+    while(it != buf.end()) {
+
+        if(escaped) {
+            if(*it == NFC_DLE) {
+                escaped = false;
+            } else if(*it == NFC_STOP) {
+                break;
+            }
+            
+        } else {
+            escaped = *it == NFC_DLE;
+        }
+        ++last;
+    }
+
+    // is end of packet still missing?
+    if(it == buf.end()) return nullptr;
+
+    // else create & return new packet
+    ByteVec content;
+    escaped = false;
+    while(true) {
+        auto & c = buf.front();
+        buf.pop_front();
+
+        if(escaped) {
+            if(c  == NFC_DLE) {
+                content.push_back(c);
+                escaped = false;
+            } else if(c == NFC_STOP) {
+                break;
+            }            
+        } else {
+            if(c == NFC_DLE) {
+                escaped = true;
+            } else {
+                content.push_back(c);
+            }
+        }
+    }
+
+    return Ptr(new NfcEmuPacket(eUp, id, ts, content));
+}
+
+
+NfcEmuPacket::Ptr NfcEmuPacket::Down(UnitId const & id,
+                                            ByteVec & content, 
+                                            size_t const ts = 0) {
+    return new NfcEmuPacket(eDown, id, ts, content);
+    
+}
