@@ -11,7 +11,11 @@
 #ifndef ISO_H
 #define ISO_H
 
-#define USE_WTX 0
+#define NONE 0
+#define NORMAL 1
+#define SINGLE 2
+
+#define USE_WTX NORMAL
 
 void IsoProcessPcd(void);
 void IsoProcessPicc(void);

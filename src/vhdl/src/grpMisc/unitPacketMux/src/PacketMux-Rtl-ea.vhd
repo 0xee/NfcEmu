@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2014-03-29
--- Last update: 2014-04-27
+-- Last update: 2014-05-09
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -77,21 +77,22 @@ begin  -- architecture Rtl
         when OrderedPriority =>         -- priority scheduler based on
                                         -- port numbers
           for i in 0 to iPortIn'length-1 loop
-            if not vFound and iPortIn(vI).Valid = '1' then
+            if not vFound and iPortIn(i).Valid = '1' then
               vSelected := i;
+				  vFound := true;
             end if;
           end loop;  -- i
           
         when RoundRobin =>              -- simple round robin scheduler
           vI := to_integer(R.ActivePort);
           for i in 0 to iPortIn'length-1 loop
+            vI := (vI + 1) mod iPortIn'length;
+				
             if not vFound and iPortIn(vI).Valid = '1' then
               vSelected := vI;
+              --vFound := true;
             end if;
 
-            if i /= iPortIn'length - 1 then
-              vI := (vI + 1) mod iPortIn'length;
-            end if;
 
           end loop;  -- i
 

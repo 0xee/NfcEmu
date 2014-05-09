@@ -236,7 +236,9 @@ begin  -- Bhv
     
     wait for 200 us;
     SendP(x"00", cIdCpu);
-    SendP(FlipBytes(x"0A0B0C0D0E0F"), cIdCpu);
+    for i in 0 to 100 loop    
+      SendP(FlipBytes(IntToVec(i, 16)), cIdCpu);
+    end loop;  -- i
 
 
     report "Feeding adc input from file";
@@ -279,7 +281,12 @@ begin  -- Bhv
 
     
     Exp(FlipBytes(x"0000"));             -- mode ack
-    Exp(FlipBytes(x"0A0B0C0D0E0F"));    -- echo test
+        for i in 0 to 100 loop
+          Exp(FlipBytes(IntToVec(i, 8)));
+          Exp(FlipBytes(IntToVec(i, 16)));
+    end loop;  -- i
+
+--    Exp(FlipBytes(x"0A0B0C0D0E0F"));    -- echo test
 --    Exp(FlipBytes(x"0001"));             -- mode ack
 --    Exp(FlipBytes(x"0A0B0C0D0E0F"));    -- echo test
 

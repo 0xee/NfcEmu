@@ -26,7 +26,7 @@ namespace NfcEmu {
                    std::string const & fx2FwFile)  : Device(io), 
                                                      fx2(io) {
         Open(fx2FwFile);   
-        mReadBuf.resize(512);
+        mReadBuf.resize(2048);
     }
 
     bool UsbDevice::CheckFx2Fw() {

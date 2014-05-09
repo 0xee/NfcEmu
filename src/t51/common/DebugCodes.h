@@ -22,5 +22,9 @@
 #define D_GEN_0        16
 #define D_GEN_1        17
 #define D_GEN_2        18
+#define D_GEN_3        13
+
+#define D_ERR 255
+
 
 #endif /* DEBUGCODES_H */

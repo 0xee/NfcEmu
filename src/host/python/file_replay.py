@@ -44,9 +44,11 @@ with closing(cs.makefile()) as cmds:
             continue
         cmd = cmd.strip().upper()
         print "CMD:  " + cmd
-
-        resp = cmdMap[cmd]
-        
+        if cmd in cmdMap:
+            resp = cmdMap[cmd]
+        else:
+            resp = [0x6A, 0x82]
         print "RESP: " + resp
         
         cs.send(resp + '\n')
+        

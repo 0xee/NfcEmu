@@ -60,7 +60,7 @@ namespace NfcEmu {
                     //D(string("e: ") + e.what());
                     if(firstTry) {
                         D("No response, programming FPGA");
-                        system(string("./fpga_pgm.sh ").append(fpgaCfg).c_str());
+                        system(string("../scripts/fpga_pgm.sh ").append(fpgaCfg).c_str());
                         firstTry = false;
                     } else {
                         D("Error initializing device");

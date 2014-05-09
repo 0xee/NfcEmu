@@ -65,9 +65,11 @@ void main(void)
 }
 
 void EchoMode() {
+    uint16_t n = 300;
     uint8_t x;
     while(1) {
         while(!PacketAvailable(HOST));
+        //SendDebug(n++);
         x = GetRxCount(HOST);
         SendPacket(HOST, ID_DEBUG, GetRx(HOST), x);
         ResetRx(HOST);            

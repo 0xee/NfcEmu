@@ -163,7 +163,7 @@ namespace Usb {
         Transfer pTransfer(libusb_alloc_transfer(0));
         auto pBuf = buffer_cast<unsigned char *>(buffer);
 
-        libusb_fill_bulk_transfer(pTransfer, dev.GetDeviceHandle(), ep, pBuf, buffer_size(buffer), &Service::LibusbAsyncCallback, 0, 100000);
+        libusb_fill_bulk_transfer(pTransfer, dev.GetDeviceHandle(), ep, pBuf, buffer_size(buffer), &Service::LibusbAsyncCallback, 0, 10000000);
 
         Instance().Submit(pTransfer, dev);
     }
