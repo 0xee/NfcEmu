@@ -62,7 +62,7 @@ typedef struct {
 } WtxContext;
 
                        
-#define SWTX_INTERVAL_MS 10L
+#define SWTX_INTERVAL_MS 120L
 #define SWTX_INTERVAL (60L)*(SWTX_INTERVAL_MS)
                        
                        
@@ -169,6 +169,8 @@ static void ProcessIBlock() {
     uint8_t responseComplete = 0;
     uint8_t pcb = piccRx[0];
     uint8_t cid = 0;
+    uint16_t apduLen;
+    uint16_t spinCount;
     iBlockReceived = 1;
     blockNumber ^= 1;
     ResetRx(HOST);
@@ -178,48 +180,55 @@ static void ProcessIBlock() {
     /* } */
     if(pcb & NAD_FOLLOWING) ++apduOffset;
 
+
+    apduLen = GetRxCount(PICC)-apduOffset-2;
+    SendPacket(HOST, ID_APDU_DOWN, piccRx+apduOffset, apduLen);
+
+    ResetRx(PICC);
+    needSwtxAck = 0;
+    spinCount = SWTX_INTERVAL;
+    /* SendSwtx(); */
+    /* needSwtxAck = 1; */
     // send apdu to host
-    SendPacket(HOST, ID_APDU_DOWN, piccRx+apduOffset, GetRxCount(PICC)-apduOffset-2);
 
-    ResetRx(PICC);
-    ResetWtx(&sWtx);
-
-#if USE_WTX == SINGLE
-    SendSwtx();
-    while(!PacketAvailable(PICC));
-
-    if(piccRx[0] != WTX_RESPONSE) {
-        SendDebug(D_NAK_RECEIVED);
-        return;
-    }
-    ResetRx(PICC);
-#endif
 
     // wait for response
     while(1) {
+        
+        if(needSwtxAck) {
+            while(!PacketAvailable(PICC));
+            if(piccRx[0] != WTX_RESPONSE) {
+                SendDebug(D_NAK_RECEIVED);
+                return;
+            } else {
+//                SendDebug(D_WTX_ACK);
+                needSwtxAck = 0;
+                spinCount = SWTX_INTERVAL;
+                ResetRx(PICC);
+            }
+        } else {
+            
+            if(spinCount == 0) {
+                SendSwtx();
+                needSwtxAck = 1;
+                continue;
+            }
+            --spinCount;
 
-#if USE_WTX == NORMAL
-        // handle waiting time extension if necessary
-        needSwtxAck = HandleWtx(&sWtx);
-        if(needSwtxAck < 0) { // pcd sent something other than wtx ack            
-            SendDebug(D_NAK_RECEIVED);
-            return;
+            if(PacketAvailable(HOST)) {  // host sent (last part of) response
+                TX_BUF[0] = 0x02 | blockNumber;                      // PCB
+                TX_BUF[1] = 0x6A;
+                TX_BUF[2] = 0x82;
+                memcpy(TX_BUF+apduOffset, hostRx, GetRxCount(HOST)); // APDU data
+                ComputeCrc(TX_BUF, GetRxCount(HOST)+apduOffset);  // CRC
+
+                SendPacket(PICC, 0, TX_BUF,  GetRxCount(HOST) +apduOffset+2);
+                ResetRx(HOST);
+                return;
+            }
         }
-        if(needSwtxAck > 0) { // wtx ack needed before response can be sent
-            continue;
-        } 
-#endif    
-        if(PacketAvailable(HOST)) {  // host sent (last part of) response
-            TX_BUF[0] = 0x02 | blockNumber;                      // PCB
-            TX_BUF[1] = 0x6A;
-            TX_BUF[2] = 0x82;
-            memcpy(TX_BUF+apduOffset, hostRx, GetRxCount(HOST)); // APDU data
-            ComputeCrc(TX_BUF, GetRxCount(HOST)+apduOffset);  // CRC
-
-            SendPacket(PICC, 0, TX_BUF,  GetRxCount(HOST) +apduOffset+2);
-            ResetRx(HOST);
-            return;
-        } /* else if(GetRxCount(HOST) == (BUFSIZE-1))  { // host sent part of response */
+    }
+        /* else if(GetRxCount(HOST) == (BUFSIZE-1))  { // host sent part of response */
         /*     while(1) { SendDebug(D_ERR); } */
         /*     TX_BUF[0] = 0x12 | blockNumber; // PCB w/ chaining bit */
         /*     memcpy(TX_BUF+apduOffset, hostRx, GetRxCount(HOST)); // APDU data */
@@ -241,9 +250,6 @@ static void ProcessIBlock() {
         /* }  */
 
 
-
-
-    }
 
 }
 

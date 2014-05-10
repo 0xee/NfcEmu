@@ -79,7 +79,7 @@ begin  -- architecture Rtl
           for i in 0 to iPortIn'length-1 loop
             if not vFound and iPortIn(i).Valid = '1' then
               vSelected := i;
-				  vFound := true;
+              vFound := true;
             end if;
           end loop;  -- i
           
@@ -90,7 +90,7 @@ begin  -- architecture Rtl
 				
             if not vFound and iPortIn(vI).Valid = '1' then
               vSelected := vI;
-              --vFound := true;
+              vFound := true;
             end if;
 
 

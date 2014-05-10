@@ -5,20 +5,13 @@ import sys
 import socket
 from nfcemu import *
 
-def TestCpu(emu):
-    "Functional test of the NfcEmu CPU"
-    print "CPU running: " + str(emu.GetFlag(3))
+def EchoTest(emu):
+    print "Testing echo mode..."
     emu.SendIHexFile(Id.CpuFw, "../../t51/smartcard/smartcard.ihx")
-
-    print "blubb"
-    print "CPU running: " + str(emu.GetFlag(3))
     time.sleep(0.2); # wait until the cpu is ready
-
+    emu.SendCmd(Id.Cpu, [0], 100)
 
     a = [0xA, 0xB, 0xC, 0xD, 0xE, 0xF]
-    b = a+a
-    print "Testing echo mode..."
-    emu.SendCmd(Id.Cpu, [0], 100)
     time.sleep(0.1)
     
     for i in range(0, 1000):
@@ -27,12 +20,11 @@ def TestCpu(emu):
         if resp != cmd:
             raise NameError("Echo error")
 
-    print "Resetting CPU..."
-    emu.SendIHexFile(Id.CpuFw, "../../t51/smartcard/smartcard.ihx")
-    
-    time.sleep(0.2) # wait until the cpu is ready
+def EchoCounterTest(emu):
     print "Testing echo counter mode..."
-    emu.SendCmd(Id.Cpu, [1], 10)
+    emu.SendIHexFile(Id.CpuFw, "../../t51/smartcard/smartcard.ihx")
+    time.sleep(0.2) # wait until the cpu is ready
+    emu.SendCmd(Id.Cpu, [1], 100)
     
     cmd = [0]
     for i in range(0, 100):
@@ -43,21 +35,38 @@ def TestCpu(emu):
             print "Resp: " + str(resp)
 
     
-try:
-    n = NfcEmu()
+def ReactionTest(emu):
+    print "Testing reaction mode..."
+    emu.SendIHexFile(Id.CpuFw, "../../t51/smartcard/smartcard.ihx")
+    time.sleep(0.2) # wait until the cpu is ready
+    emu.SendCmd(Id.Cpu, [3], 100)
     
-    n.OpenUsbDevice("../../vhdl/src/grpNfcEmu/unitTbdNfcEmu/synlay/TbdNfcEmu.sof")
+    time.sleep(1)
+    print "Sending command"
+    cmd = [1, 2, 3, 4, 5]
+    resp = emu.Send(Id.Cpu, [9,9,9,9]);
+    resp = emu.SendCmd(Id.Cpu, cmd, 3000);
+    if resp != cmd: raise NameError("Reaction test")
+    print "Received response"
+    emu.SendIHexFile(Id.CpuFw, "../../t51/smartcard/smartcard.ihx")
+    time.sleep(0.2) # wait until the cpu is ready
+    
+n = NfcEmu()
+    
+n.OpenUsbDevice("../../vhdl/src/grpNfcEmu/unitTbdNfcEmu/synlay/TbdNfcEmu.sof")
 
-    n.AddDisplayLog(Id.Any)
+n.AddDisplayLog(Id.Any)
 
-    TestCpu(n)
+try:
+    ReactionTest(n)
+    EchoTest(n)
+    EchoCounterTest(n)
     time.sleep(1)
         
-
-
 except KeyboardInterrupt:
     print "ctrl-c caught"
-except NameError:
-    print "error testing cpu"
+except NameError, e:
+    print "Error in " + str(e)
 
+n.CloseDevice()
 print ":::: end of script"

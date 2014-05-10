@@ -160,12 +160,15 @@ namespace Usb {
 
     void Service::AsyncBulkRead(Device & dev, int const ep,
                                 boost::asio::mutable_buffer buffer) throw(Error) {
-        Transfer pTransfer(libusb_alloc_transfer(0));
+
+        Transfer pT1(libusb_alloc_transfer(0));
+        Transfer pT2(libusb_alloc_transfer(0));
         auto pBuf = buffer_cast<unsigned char *>(buffer);
 
-        libusb_fill_bulk_transfer(pTransfer, dev.GetDeviceHandle(), ep, pBuf, buffer_size(buffer), &Service::LibusbAsyncCallback, 0, 10000000);
-
-        Instance().Submit(pTransfer, dev);
+        libusb_fill_bulk_transfer(pT1, dev.GetDeviceHandle(), ep, pBuf, 
+                                  buffer_size(buffer), &Service::LibusbAsyncCallback, 
+                                  0, 10000000);
+        Instance().Submit(pT1, dev);
     }
 
 

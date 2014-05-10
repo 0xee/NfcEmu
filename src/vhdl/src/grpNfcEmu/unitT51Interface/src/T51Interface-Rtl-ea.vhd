@@ -202,7 +202,7 @@ begin  -- architecture Rtl
           rTxShortFrame(i) <= '0';
         end if;
 
-        if iInputPorts(i).Eof = '1' then
+        if iInputPorts(i).Eof and sRxBufAck(i) then
           rRxEof(i) <= '1';
         elsif sRxReset(i) = '1' then
           rRxEof(i) <= '0';

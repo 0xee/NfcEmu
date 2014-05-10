@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-05-31
--- Last update: 2013-09-19
+-- Last update: 2014-05-10
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -32,6 +32,8 @@ architecture Rtl of Fx2FifoInterface is
   constant cEp6Adr : std_ulogic_vector := "10";
   constant cEp8Adr : std_ulogic_vector := "11";
 
+  constant cPacketTimeout : natural := 48*12000;
+
   signal sFifoDin, sFifoDout     : std_ulogic_vector(7 downto 0);
   signal sDOutEnable, sDInEnable : std_ulogic;
 
@@ -47,10 +49,12 @@ architecture Rtl of Fx2FifoInterface is
   type aRegSet is record
     State         : aFifoState;
     HostConnected : std_ulogic;
+    EofTimeout    : natural range 0 to cPacketTimeout-1;
   end record;
 
   constant cRegInitval : aRegSet := (State         => Init,
-                                     HostConnected => '0');
+                                     HostConnected => '0',
+                                     EofTimeout    => 0);
 
   signal R     : aRegSet := cRegInitval;
   signal NextR : aRegSet;
@@ -86,8 +90,15 @@ begin  -- Rtl
     sDOutEnable <= '0';
     sFifoWr     <= '0';
     sFifoRd     <= '0';
-    onFx2PktEnd <= '1';
     oFx2FifoAdr <= cEp2Adr;
+
+    onFx2PktEnd <= '1';
+    --if R.EofTimeout = 0 then
+    --  onFx2PktEnd <= '0';
+    --  NextR.EofTimeout <= cPacketTimeout-1;
+    --else
+    --  NextR.EofTimeout <= R.EofTimeout - 1;
+    --end if;
 
     case R.State is
       when Init =>
@@ -111,6 +122,9 @@ begin  -- Rtl
             sFifoWr     <= '1';
             oAck        <= '1';
             if iEndOfPacket = '1' then
+              --if R.EofTimeout = 0 then
+              --  NextR.EofTimeout <= cPacketTimeout-1;
+              --end if;
               onFx2PktEnd <= '0';
               NextR.State <= Idle;
             end if;
@@ -121,7 +135,7 @@ begin  -- Rtl
         end if;
         
         
-   
+        
       when Rd =>
         NextR.HostConnected <= '1';
         if sFifo2DataAvailable = '1' then

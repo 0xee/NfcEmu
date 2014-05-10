@@ -100,11 +100,11 @@ BEGIN
 	dcfifo_component : dcfifo
 	GENERIC MAP (
 		intended_device_family => "Cyclone IV GX",
-		lpm_numwords => 32,
+		lpm_numwords => 128,
 		lpm_showahead => "ON",
 		lpm_type => "dcfifo",
 		lpm_width => 8,
-		lpm_widthu => 5,
+		lpm_widthu => 7,
 		overflow_checking => "OFF",
 		rdsync_delaypipe => 4,
 		read_aclr_synch => "OFF",

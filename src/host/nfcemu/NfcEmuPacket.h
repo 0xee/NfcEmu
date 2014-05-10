@@ -46,11 +46,14 @@ namespace NfcEmu {
 
         template<typename Iterator>
         static Ptr FromUpBuffer(Iterator first, Iterator last, Iterator & packetEnd) {
+            size_t leading = 0;
             while(first != last) { 
                 if(*first == NFC_START) break;
                 ++first;
+                ++leading;
             }
 
+            if(leading) D("Leading bytes: " + std::to_string(leading));
             if(first == last || !FindEnd(first, last, packetEnd)) {
                 // D("no packet in buffer");
                 return nullptr;

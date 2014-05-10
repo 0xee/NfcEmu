@@ -20,6 +20,7 @@ void DelayMs(uint16_t const ms) {
 #define ECHO_MODE 0
 #define ECHO_COUNT_MODE 1
 #define SMARTCARD_MODE 2
+#define REACTION_MODE 3
 #define INVALID_MODE 0xFF
 
 #define RESP_OK 0
@@ -28,6 +29,7 @@ void DelayMs(uint16_t const ms) {
 void EchoMode();
 void EchoCountMode();
 void SmartcardMode();
+void ReactionMode();
 
 void main(void)
 { 
@@ -57,9 +59,39 @@ void main(void)
     case ECHO_COUNT_MODE:
         EchoCountMode();
         break;
+    case REACTION_MODE:
+        ReactionMode();
+        break;
     case SMARTCARD_MODE:
         SmartcardMode();
         break;
+    }
+
+}
+
+void ReactionMode() {
+    uint8_t i;
+    uint8_t const size = 6;
+    TX_BUF[0] = 0xAA;
+    
+    for(i = 1; i < size+2; ++i) {
+        TX_BUF[i] = TX_BUF[i-1] + 0x11;
+    }
+
+    while(1) {
+        SendPacket(HOST, ID_PICC, TX_BUF, size);
+        DelayMs(1);
+        SendPacket(HOST, ID_PICC, TX_BUF+1, size);
+        DelayMs(1);
+        SendPacket(HOST, ID_PICC, TX_BUF+2, size);
+        DelayMs(1);
+        if(PacketAvailable(HOST)) {
+//            for(i = 0; i < 50; ++i)
+              SendPacket(HOST, ID_DEBUG, GetRx(HOST), GetRxCount(HOST));
+            ResetRx(HOST);
+            while(1);
+        }
+
     }
 
 }

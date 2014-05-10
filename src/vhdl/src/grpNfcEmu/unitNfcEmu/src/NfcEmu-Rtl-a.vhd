@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-06-15
--- Last update: 2014-04-28
+-- Last update: 2014-05-09
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -121,10 +121,11 @@ architecture Rtl of NfcEmu is
     sPcdARxToHost,
     sControlToHost,
     sCpuToHost,
-    sStreamData
+    sStreamData,
+    sDebugData
     : aDataPortConnection;
 
-
+  signal rDbgActive : std_ulogic;
 -------------------------------------------------------------------------------
 -- Connections between Units 
 -------------------------------------------------------------------------------
@@ -169,9 +170,9 @@ begin  -- Rtl
 
   Status : process (all) is
   begin  -- process status
-    sStatus <= cInitCfg;
+    sStatus                        <= cInitCfg;
     sStatus.Flags(cFlagCpuRunning) <= sCpuRunning;
-    sStatus.Flags(cFlagNfcField) <= sNfcFieldSteady;
+    sStatus.Flags(cFlagNfcField)   <= sNfcFieldSteady;
     
   end process status;
 
@@ -194,13 +195,13 @@ begin  -- Rtl
   sFromHost <= iDin;
 
   sHostToCpu.DPort <= iDin when MatchId(sFromHost.Id, cIdCpu) or MatchId(sFromHost.Id, cIdIsoLayer4Picc) else
-                cEmptyPort;
+                      cEmptyPort;
   
   sHostToCpuFw.DPort <= iDin when MatchId(sFromHost.Id, cIdCpuFw) else
                         cEmptyPort;
 
   sHostToControl.DPort <= iDin when MatchId(sFromHost.Id, cIdCtrl) else
-                    cEmptyPort;
+                          cEmptyPort;
 
   --sHostToPcdAValid <= iDin.Valid when MatchId(sFromHost.Id, cIdIso14443aPcd) else
   --                   '0';
@@ -224,7 +225,29 @@ begin  -- Rtl
   sToHost(4) <= sControlToHost.DPort;
   sToHost(5) <= sCpuToHost.DPort;
   sToHost(6) <= sStreamData.DPort;
-  sToHost(7) <= cEmptyPort;  -- to make packetmux scheduler more efficient
+  sToHost(7) <= sDebugData.DPort;  -- to make packetmux scheduler more efficient
+
+  RxDbg : process(iClk, inResetAsync) is
+  begin
+    if inResetAsync = '0' then
+      rDbgActive <= '0';
+    elsif rising_edge(iClk) then
+      if rDbgActive then
+        if sDebugData.Ack then
+          rDbgActive <= '0';
+        end if;
+      else
+        if sHostToCpu.DPort.Eof and sHostToCpu.Ack then
+          rDbgActive <= '1';
+        end if;
+      end if;
+    end if;
+  end process;
+
+  sDebugData.DPort.Data <= x"EE";
+  sDebugData.DPort.Id <= x"EE";
+  sDebugData.DPort.Eof <= sDebugData.DPort.Valid;
+  sDebugData.DPort.Valid <= rDbgActive;
 
   sPiccARxToHost.Ack    <= sHostAck(0);
   sPiccALogicToHost.Ack <= sHostAck(1);
@@ -233,7 +256,7 @@ begin  -- Rtl
   sControlToHost.Ack    <= sHostAck(4);
   sCpuToHost.Ack        <= sHostAck(5);
   sStreamData.Ack       <= sHostAck(6);
-
+  sDebugData.Ack        <= sHostAck(7);
   PacketMux_1 : entity misc.PacketMux(Rtl)
     generic map (
       gScheduler => RoundRobin)
@@ -269,7 +292,7 @@ begin  -- Rtl
       oCfgValid    => sCfgValid);
 
   oDacOut <= "000000000" & sCpuRunning;
-  
+
   sStreamValid <= sEnableAcq and iEnvelopeValid when sCfg.Enable(cEnvelopeStream) else
                   sEnableAcq and iEnvelopeValid when sCfg.Enable(cTestStream) else
                   '0';
@@ -387,16 +410,16 @@ begin  -- Rtl
       iTxAck        => sLayer4Tx.Ack,
       oTxShortFrame => sIsoLayer4TxShortFrame,
       oHostOut      => sCpuToHost.DPort,  -- TODO: ack
-      iHostOutAck => sCpuToHost.Ack,
+      iHostOutAck   => sCpuToHost.Ack,
 
       iHostIn     => sHostToCpu.DPort,
-      oHostInAck    => sHostToCpu.Ack,
+      oHostInAck  => sHostToCpu.Ack,
       oSelected   => sPiccALayer4Selected,
       iFwIn       => sHostToCpuFw.DPort,
       oFwAck      => sHostToCpuFw.Ack,
       oCpuRunning => sCpuRunning);
-  
-  
+
+
   sLayer4Rx.Ack <= sLayer4Rx.DPort.Valid;
 
 end Rtl;

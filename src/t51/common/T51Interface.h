@@ -35,6 +35,8 @@
 #define ID_APDU_UP  (0x40 | MY_ID)
 #define ID_APDU_DOWN  (0x20 | MY_ID)
 
+#define ID_PICC 0x25
+
 #define TX_BUF GetTxBuf()
 
 typedef volatile uint8_t __xdata * rx_t;

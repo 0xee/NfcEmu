@@ -21,7 +21,7 @@ struct T51Port {
 };
 
 
-T51Port __xdata volatile * __code const pPorts = IF_BASE_ADDRESS;
+T51Port __xdata volatile * const pPorts = IF_BASE_ADDRESS;
 
 uint8_t __xdata txBuf[BUFSIZE];
 

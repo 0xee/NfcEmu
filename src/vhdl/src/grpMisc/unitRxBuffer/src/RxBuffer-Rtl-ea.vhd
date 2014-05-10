@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-09-18
--- Last update: 2013-09-20
+-- Last update: 2014-05-09
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library	global;
+library global;
 use global.Global.all;
 
 entity RxBuffer is
@@ -53,35 +53,34 @@ end entity RxBuffer;
 architecture Rtl of RxBuffer is
   type aRamImage is array (0 to gSize-1) of std_ulogic_vector(gWidth-1 downto 0);
 
-  signal sRam                    : aRamImage;
+  signal sRam        : aRamImage;
   signal rFull, rAck : std_ulogic;
-  signal rWriteAdr               : natural range 0 to gSize-1;
+  signal rWriteAdr   : natural range 0 to gSize-1;
   
 begin  -- architecture Rtl
 
   Writer : process (iClk, inResetAsync) is
   begin  -- process Writer
     if inResetAsync = '0' then          -- asynchronous reset (active low)
-      rWriteAdr  <= 0;
-      rFull      <= '0';
+      rWriteAdr <= 0;
+      rFull     <= '0';
 
     elsif rising_edge(iClk) then        -- rising clock edge
 
-        if iValid = '1' and rFull = '0' then
-          sRam(rWriteAdr) <= iDin;
-          if rWriteAdr = gSize-1 then
-            rFull <= '1';
-          else
-            rWriteAdr <= rWriteAdr + 1;
-          end if;
+      if iValid and not rFull then
+        sRam(rWriteAdr) <= iDin;
+        if rWriteAdr = gSize-2 then
+          rFull <= '1';
         end if;
+        rWriteAdr <= rWriteAdr + 1;
+      end if;
 
-        if iSyncReset = '1' then
-          rFull      <= '0';
-          rWriteAdr  <= 0;
-        end if;
+      if iSyncReset = '1' then
+        rFull     <= '0';
+        rWriteAdr <= 0;
+      end if;
 
-        
+      
       
     end if;
   end process Writer;

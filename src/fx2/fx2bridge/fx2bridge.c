@@ -56,7 +56,7 @@ static void Initialize(void)
 	SYNCDELAY;
 
 	IFCONFIG=0xe3;  // Internal 48MHz IFCLK; IFCLK pin output enabled
-			// slave FIFO in synchronous mode
+                    // slave FIFO in synchronous mode
 	SYNCDELAY;
 	
 	REVCTL=0x03;  // See TRM...

@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2014-04-03
--- Last update: 2014-05-08
+-- Last update: 2014-05-10
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ begin  -- architecture Rtl
       oDout        => oDout,
       iAckOut      => iAckOut);
 
-  Comb : process (all) is
+  Comb : process (R, iValid, iAckOut, iDin) is
   begin  -- process Comb
     NextR          <= R;
     oAckIn         <= '0';
