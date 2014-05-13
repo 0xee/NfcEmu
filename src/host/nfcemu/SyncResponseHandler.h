@@ -43,10 +43,9 @@ namespace NfcEmu {
         }
         
         bool Notify(Packet const & p) {            
-            //D("Received packet: " + std::to_string(p.Id()) + ": " + 
-            //Util::FormatHex(p.Begin(), p.End()));
             if(mAcceptedId == UnitId::eAny || p.Id().GetUnit() == mAcceptedId) {
-                //D("Accepted");
+                // D("Accepted packet: " + std::to_string(p.Id()) + ": " + 
+                //   Util::FormatHex(p.Begin(), p.End()));
                 pProm->set_value(p);
                 mAccepting = false;
                 return true;

@@ -65,6 +65,8 @@ package Global is
     Ack   : std_ulogic;
   end record;
 
+  type aDataPortConnectionArray is array (natural range <>) of aDataPortConnection;
+
   constant cEmptyPort : aDataPort := (Id    => (others => '-'),
                                       Data  => (others => '-'),
                                       Valid => '0',

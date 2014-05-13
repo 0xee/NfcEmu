@@ -34,7 +34,7 @@ namespace NfcEmu {
     class PacketListener {
 
     public:
-        typedef std::unique_ptr<PacketListener> Ptr;
+        typedef std::shared_ptr<PacketListener> Ptr;
 
         PacketListener() { }
         virtual ~PacketListener() {} 

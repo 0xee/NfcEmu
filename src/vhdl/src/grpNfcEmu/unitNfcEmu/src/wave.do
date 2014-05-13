@@ -1,9 +1,24 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iDin
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iEnable
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iRdAdr
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iRdStb
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iSyncReset
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iValid
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/inResetAsync
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/oAck
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/oBytesAvailable
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/oDout
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/oRdAck
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/rAck
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/rFull
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/rWriteAdr
+add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/sRam
 add wave -noupdate /tbnfcemu/NfcEmu_1/iClk
 add wave -noupdate /tbnfcemu/NfcEmu_1/inResetAsync
 add wave -noupdate /tbnfcemu/sWdtReset
-add wave -noupdate /tbnfcemu/sDin
+add wave -noupdate -radix hexadecimal -childformat {{/tbnfcemu/sDin.DPort -radix hexadecimal -childformat {{/tbnfcemu/sDin.DPort.Id -radix hexadecimal} {/tbnfcemu/sDin.DPort.Data -radix hexadecimal}}}} -expand -subitemconfig {/tbnfcemu/sDin.DPort {-radix hexadecimal -childformat {{/tbnfcemu/sDin.DPort.Id -radix hexadecimal} {/tbnfcemu/sDin.DPort.Data -radix hexadecimal}} -expand} /tbnfcemu/sDin.DPort.Id {-radix hexadecimal} /tbnfcemu/sDin.DPort.Data {-radix hexadecimal}} /tbnfcemu/sDin
 add wave -noupdate /tbnfcemu/NfcEmu_1/oAckIn
 add wave -noupdate -childformat {{/tbnfcemu/NfcEmu_1/oDout.Id -radix hexadecimal} {/tbnfcemu/NfcEmu_1/oDout.Data -radix hexadecimal}} -expand -subitemconfig {/tbnfcemu/NfcEmu_1/oDout.Id {-height 16 -radix hexadecimal} /tbnfcemu/NfcEmu_1/oDout.Data {-height 16 -radix hexadecimal}} /tbnfcemu/NfcEmu_1/oDout
 add wave -noupdate /tbnfcemu/NfcEmu_1/iAckOut
@@ -55,21 +70,6 @@ add wave -noupdate -radix hexadecimal /tbnfcemu/NfcEmu_1/sHostToPiccA
 add wave -noupdate -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/iOutputAck
 add wave -noupdate -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/oInputAck
 add wave -noupdate -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/oOutputPorts
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iDin
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iEnable
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iRdAdr
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iRdStb
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iSyncReset
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/iValid
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/inResetAsync
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/oAck
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/oBytesAvailable
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/oDout
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/oRdAck
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/rAck
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/rFull
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/rWriteAdr
-add wave -noupdate -expand -group hostbuffer -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/T51Interface_1/RxBuffers(0)/RxBuffer/sRam
 add wave -noupdate -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/sRomAdr
 add wave -noupdate -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/sRomData
 add wave -noupdate -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/snCpuReset
@@ -80,7 +80,7 @@ add wave -noupdate -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolPr
 add wave -noupdate -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/sWbRdStb
 add wave -noupdate -radix hexadecimal /tbnfcemu/NfcEmu_1/Iso14443_4_1/ProtocolProcessor_1/sWbWrStb
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {403367467 ps} 0}
+WaveRestoreCursors {{Cursor 1} {421238 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 222
 configure wave -valuecolwidth 100
@@ -96,4 +96,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {401977476 ps} {413800776 ps}
+WaveRestoreZoom {0 ps} {2050782 ps}

@@ -17,8 +17,7 @@
 
 typedef unsigned char BYTE;
 
-uint16_t UpdateCrc(unsigned char ch, uint16_t *lpwCrc);
-
-void ComputeCrc(char *Data, int Length);
+void AppendCrc(char *Data, int Length);
+uint16_t CalcCrc(char const *Data, int Length);
 
 #endif /* CRC_A_H */

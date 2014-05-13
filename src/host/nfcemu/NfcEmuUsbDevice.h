@@ -54,7 +54,7 @@ namespace NfcEmu {
         bool IsOpen() const;
 
         void StartAsyncRead() {
-            StartAsyncRead2(0);
+            StartAsyncRead2(1);
         }
         void StartAsyncRead2(size_t const buffer = 0) {
             /// @todo: protect usb device on reentrance

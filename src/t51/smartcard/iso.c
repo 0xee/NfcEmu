@@ -7,7 +7,7 @@
  * 
  */
 
-#include "T51Interface.h"
+#include "../common/T51Interface.h"
 #include "iso.h"
 #include "crc_a.h"
 #include <string.h>
@@ -19,6 +19,7 @@
 #define CMD_ATTRIB       0x1D
 #define CMD_DESELECT     0xC2
 #define CMD_DESELECT_CID 0xCA
+#define CMD_PPS          0xD0
 
 #define WTX_REQUEST      0xF2
 #define WTX_RESPONSE      0xF2
@@ -62,7 +63,7 @@ typedef struct {
 } WtxContext;
 
                        
-#define SWTX_INTERVAL_MS 120L
+#define SWTX_INTERVAL_MS 60L
 #define SWTX_INTERVAL (60L)*(SWTX_INTERVAL_MS)
                        
                        
@@ -75,7 +76,7 @@ static void ResetWtx(WtxContext * wtx) {
 static void SendSwtx(void) {
     TX_BUF[0] = WTX_REQUEST;
     TX_BUF[1] = 14;
-    ComputeCrc(TX_BUF, 2);
+    AppendCrc(TX_BUF, 2);
     SendPacket(PICC, 0, TX_BUF, 4);
 }
 
@@ -113,9 +114,17 @@ void IsoInit() {
 
 void IsoProcessPcd(void) {
     uint8_t rxLen = GetRxCount(PICC);
-    /* SetId(HOST, ID_DEBUG); */
-    /* SendEof(HOST, rx[0]); */
-    /* SetId(HOST, ID_APDU); */
+    uint16_t crc;
+
+    if(rxLen > 2) {
+        crc = CalcCrc(piccRx, rxLen-2);
+        if( (uint8_t)crc != piccRx[rxLen-2] || (uint8_t)(crc>>8) != piccRx[rxLen-1] ) {
+            ResetRx(PICC);
+            SendDebug(D_CRC_ERROR);
+            return;
+        }
+    }
+
     switch(piccRx[0] & BLOCK_MASK) {
     case I_BLOCK:
         ProcessIBlock();
@@ -126,7 +135,11 @@ void IsoProcessPcd(void) {
         break;
 
     case S_BLOCK:
-        ProcessSBlock();
+        if((piccRx[0] & 0xF0) == CMD_PPS) {
+            ProcessPps();
+        } else {
+            ProcessSBlock();
+        }
         break;
 
     default:
@@ -143,7 +156,7 @@ void IsoProcessPcd(void) {
     }
 }
 
-static uint8_t __code const ats[] = {0x77, 0x80, 0x70, 0x00};
+static uint8_t __code const ats[] = {0x77, 0x00, 0x70, 0x00};
 
 static uint8_t __code const historical[] = {0x45, 0x50, 0x41, 0x00, 0x00, 0x00, 0x00, 0x61, 0x27, 0x38, 0x94, 0x00, 0x00, 0x00, 0x00};
 //static uint8_t __code const historical[] = {0x45, 0x50, 0x41, 0x00, 0x00, 0x00, 0x00, 0x61, 0x27, 0x38, 0x94, 0x00, 0x00, 0x00, 0x00};
@@ -155,7 +168,7 @@ static void SendAts(void) {
     TX_BUF[0] += sizeof(ats);
     memcpy(TX_BUF+TX_BUF[0], historical, sizeof(historical));
     TX_BUF[0] += sizeof(historical);
-    ComputeCrc(TX_BUF, TX_BUF[0]);
+    AppendCrc(TX_BUF, TX_BUF[0]);
     SendPacket(PICC, 0, TX_BUF, TX_BUF[0]+2);
     
     SendDebug(D_ISO_L4_ACTIVATED); 
@@ -220,7 +233,7 @@ static void ProcessIBlock() {
                 TX_BUF[1] = 0x6A;
                 TX_BUF[2] = 0x82;
                 memcpy(TX_BUF+apduOffset, hostRx, GetRxCount(HOST)); // APDU data
-                ComputeCrc(TX_BUF, GetRxCount(HOST)+apduOffset);  // CRC
+                AppendCrc(TX_BUF, GetRxCount(HOST)+apduOffset);  // CRC
 
                 SendPacket(PICC, 0, TX_BUF,  GetRxCount(HOST) +apduOffset+2);
                 ResetRx(HOST);
@@ -254,7 +267,6 @@ static void ProcessIBlock() {
 }
 
 
-
 static void ProcessRBlock() {
     if(piccRx[0] & R_NAK) {
         SendDebug(D_NAK_RECEIVED);
@@ -268,7 +280,7 @@ static void ProcessRBlock() {
 
 
         TX_BUF[0] = 0xA3;
-        ComputeCrc(TX_BUF, 1);
+        AppendCrc(TX_BUF, 1);
         SendPacket(PICC, 0, TX_BUF, 3);
     } else {
         SendDebug(D_ACK_RECEIVED);
@@ -294,4 +306,11 @@ static void ProcessSBlock() {
 static void SendDeselectResp(void) {
     memcpy(TX_BUF,piccRx,3);
     SendPacket(PICC, 0, piccRx, 3);
+}
+
+static void ProcessPps(void) {
+    TX_BUF[0] = piccRx[0];
+    ResetRx(PICC);
+    AppendCrc(TX_BUF, 1);
+    SendPacket(PICC, 0, TX_BUF, 3);
 }

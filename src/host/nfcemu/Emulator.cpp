@@ -139,7 +139,7 @@ namespace NfcEmu {
         auto packetFuture = pPacketPromise->get_future();
         {
             LOCK_SCOPE;
-            mExclusiveHandlers.push_front(move(pRh));
+            mExclusiveHandlers.push_front(pRh);
         }
 
         mpDev->SendPacket(*Packet::Down(UnitId(unit), packet.begin(), packet.end()));
@@ -151,7 +151,11 @@ namespace NfcEmu {
             throw runtime_error("Response timeout");
         }
 
+        // if the handler got called, it has been removed from the handler
+        // stack automatically.
+        
         auto resp = packetFuture.get();
+
 
         return std::vector<unsigned char>(resp.Begin(), resp.End());
     }

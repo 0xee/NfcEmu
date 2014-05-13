@@ -39,15 +39,27 @@ namespace Usb {
         void AsyncBulkRead(int const ep, boost::asio::mutable_buffer buffer, 
                            ReadCallback::slot_type & callback) throw(Error);
 
+        void AsyncIsoRead(int const ep, boost::asio::mutable_buffer buffer, 
+                           ReadCallback::slot_type & callback) throw(Error);
+
         void CancelAsync();
 
         size_t BulkRead(int const ep,
                         boost::asio::mutable_buffer buffer,
                         size_t const timeout = 10) throw(Error);
 
+        size_t IntRead(int const ep,
+                        boost::asio::mutable_buffer buffer,
+                        size_t const timeout = 10) throw(Error);
+
 
         void BulkWrite(int const ep, boost::asio::const_buffer buffer,
                        size_t const timeout = 0) throw(Error);
+        void IntWrite(int const ep, boost::asio::const_buffer buffer,
+                       size_t const timeout = 0) throw(Error);
+        void IsoWrite(int const ep, boost::asio::const_buffer buffer,
+                       size_t const timeout = 0) throw(Error);
+
         int ControlMessage(unsigned char const requestType,
                            unsigned char const request,
                            unsigned short const value,

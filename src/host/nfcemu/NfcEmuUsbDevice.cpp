@@ -26,8 +26,8 @@ namespace NfcEmu {
                    std::string const & fx2FwFile)  : Device(io), 
                                                      fx2(io) {
         Open(fx2FwFile);   
-        mReadBuf1.resize(2048);
-        mReadBuf2.resize(2048);
+        mReadBuf1.resize(512);
+        mReadBuf2.resize(512);
     }
 
     bool UsbDevice::CheckFx2Fw() {
@@ -35,9 +35,7 @@ namespace NfcEmu {
         try {
             unsigned char c = FX2_POLL_FW;
             fx2.BulkWrite(1, const_buffer(&c, sizeof(c)), 100);
-
-            return (fx2.BulkRead(0x81, buffer(&c, sizeof(c)), 10) == 1) && (c == FX2_FW_OK); 
-
+            return (fx2.BulkRead(0x81, buffer(&c, sizeof(c)), 10) == 1) && (c == FX2_FW_OK);
         } catch(Usb::Error e) {
             Error(string(e.code().message()) + " " + e.what());
             return false;
@@ -58,6 +56,9 @@ namespace NfcEmu {
             Warning("FX2 not responding, updating firmware");
             try {
                 fx2.DownloadFirmware(fx2FwFile);
+                if(!CheckFx2Fw()) {
+                    Fatal("FX2 still not responding");
+                }
             } catch (runtime_error & e) {
                 Fatal("Error downloading firmware to FX2");
                 throw(runtime_error("communication error"));
@@ -95,6 +96,7 @@ namespace NfcEmu {
     }
 
     size_t UsbDevice::Read(boost::asio::mutable_buffer buf) {
+
         size_t maxLen = boost::asio::buffer_size(buf);
         int const epIn = 0x86;        
         int ret = 0;

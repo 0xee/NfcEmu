@@ -25,6 +25,7 @@ namespace NfcEmu {
 
     unique_ptr<Device> DeviceFactory::BuildUsbDevice(boost::asio::io_service & io, 
                                                      string const & id) {
+
         Configuration::RegisterOption("fx2fw", "fx2", "../../fx2/fx2bridge/fx2bridge.ihx");
     
         auto pUsbDev = Device::Ptr(new UsbDevice(io, Configuration::GetOption("fx2fw").Str()));

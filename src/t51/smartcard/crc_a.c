@@ -9,7 +9,7 @@
 
 #include "crc_a.h"
 
-uint16_t UpdateCrc(unsigned char ch, uint16_t *lpwCrc)
+static inline uint16_t UpdateCrc(unsigned char ch, uint16_t *lpwCrc)
 {
     ch = (ch^(unsigned char)((*lpwCrc) & 0x00FF));
     ch = (ch^(ch<<4));
@@ -17,7 +17,7 @@ uint16_t UpdateCrc(unsigned char ch, uint16_t *lpwCrc)
     return(*lpwCrc);
 }
 
-void ComputeCrc(char *Data, int Length) {
+void AppendCrc(char *Data, int Length) {
     unsigned char chBlock;
     uint16_t wCrc;
     wCrc = 0x6363; /* ITU-V.41 */
@@ -29,4 +29,16 @@ void ComputeCrc(char *Data, int Length) {
     *Data++ = (BYTE) (wCrc & 0xFF);
     *Data++ = (BYTE) ((wCrc >> 8) & 0xFF);
     return;
+}
+
+uint16_t CalcCrc(char const *Data, int Length) {
+    unsigned char chBlock;
+    uint16_t wCrc;
+    wCrc = 0x6363; /* ITU-V.41 */
+    do {
+        chBlock = *Data++;
+        UpdateCrc(chBlock, &wCrc);
+    } while (--Length);
+
+    return wCrc;
 }

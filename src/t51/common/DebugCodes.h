@@ -11,6 +11,7 @@
 #define DEBUGCODES_H
 
 
+#define D_CRC_ERROR 7
 #define D_T51_READY 8
 #define D_ISO_L4_ACTIVATED 9
 #define D_ISO_L4_DEACTIVATED 10

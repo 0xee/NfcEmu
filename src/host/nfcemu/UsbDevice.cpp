@@ -41,6 +41,13 @@ namespace Usb {
         Service::AsyncBulkRead(*this, ep, buffer);
     }
 
+    void Device::AsyncIsoRead(int const ep, boost::asio::mutable_buffer buffer, 
+                               ReadCallback::slot_type & callback) throw(Error) {
+        mReadCallback.disconnect_all_slots();
+        mReadCallback.connect(callback);
+        Service::AsyncIsoRead(*this, ep, buffer);
+    }
+
     void Device::CancelAsync() {
         Service::CancelByDevice(*this);
     }
@@ -50,6 +57,11 @@ namespace Usb {
                          size_t const timeout) throw(Error) {
         return Service::BulkRead(mDev, ep, buffer, timeout);
     }
+    size_t Device::IntRead(int const ep,
+                         boost::asio::mutable_buffer buffer,
+                         size_t const timeout) throw(Error) {
+        return Service::IntRead(mDev, ep, buffer, timeout);
+    }
 
     void Device::BulkWrite(int const  ep, boost::asio::const_buffer buffer, 
                              size_t const timeout) throw(Error) {
@@ -57,6 +69,21 @@ namespace Usb {
             throw runtime_error("not connected");
         }
         Service::BulkWrite(mDev, ep, buffer, timeout);
+    }
+
+    void Device::IsoWrite(int const  ep, boost::asio::const_buffer buffer, 
+                             size_t const timeout) throw(Error) {
+        if(!IsConnected()) {
+            throw runtime_error("not connected");
+        }
+        Service::IsoWrite(mDev, ep, buffer, timeout);
+    }
+    void Device::IntWrite(int const  ep, boost::asio::const_buffer buffer, 
+                             size_t const timeout) throw(Error) {
+        if(!IsConnected()) {
+            throw runtime_error("not connected");
+        }
+        Service::IntWrite(mDev, ep, buffer, timeout);
     }
 
     int Device::ControlMessage(unsigned char const requestType,

@@ -29,6 +29,7 @@ static void SendAts(void);
 static void ProcessIBlock(void);
 static void ProcessRBlock(void);
 static void ProcessSBlock(void);
+static void ProcessPps(void);
 
 
 static void SendDeselectResp(void);

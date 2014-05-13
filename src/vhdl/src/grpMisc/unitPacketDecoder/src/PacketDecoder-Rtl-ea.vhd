@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2014-04-03
--- Last update: 2014-05-10
+-- Last update: 2014-05-11
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ architecture Rtl of PacketDecoder is
   signal sPortBufferAck : std_ulogic;
 begin  -- architecture Rtl
 
-  PortBuffer_1 : entity misc.PortBuffer
+  PortBuffer_1 : entity misc.PortBuffer(Rtl)
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,
@@ -80,7 +80,7 @@ begin  -- architecture Rtl
       oDout        => oDout,
       iAckOut      => iAckOut);
 
-  Comb : process (R, iValid, iAckOut, iDin) is
+  Comb : process (R, iValid, iAckOut, iDin, sPortBufferAck) is
   begin  -- process Comb
     NextR          <= R;
     oAckIn         <= '0';
@@ -127,7 +127,7 @@ begin  -- architecture Rtl
               NextR.DleState  <= Normal;
             elsif iDin = gDataLinkEscape then
               Send(sPortBuffer, iDin);
-              if sPortBufferAck then
+              if sPortBufferAck = '1' then
                 oAckIn         <= '1';
                 NextR.DleState <= Normal;
               end if;

@@ -99,7 +99,7 @@ namespace NfcEmu {
             for(int i = 0; i < 4096; i += bs) {
                 if(!mpEmu->Send(unit, std::vector<unsigned char>(image.begin()+i,
                                                                  image.begin()+i+bs))) return false;
-                std::cout << "." << i << " " << std::flush;
+                std::cout << "." << std::flush;
             }
             std::cout << std::endl;
             return true;

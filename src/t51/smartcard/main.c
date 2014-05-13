@@ -33,40 +33,46 @@ void ReactionMode();
 
 void main(void)
 { 
-    uint8_t mode = INVALID_MODE;
+    uint8_t mode;
     P0 = 0x00;
 
     IfInit();
-    
-    while(mode == INVALID_MODE) {
-        while(!PacketAvailable(HOST));
-        if(GetRxCount(HOST) == 1) {
-            mode = *GetRx(HOST);
-            TX_BUF[0] = RESP_OK;
-            TX_BUF[1] = mode;
-            SendPacket(HOST, ID_CTRL, TX_BUF, 2);
-        } else {
-            TX_BUF[0] = RESP_ERROR;
-            SendPacket(HOST, ID_CTRL, TX_BUF, 1);
+ 
+    while(1) {
+
+        mode = INVALID_MODE;
+        while(mode == INVALID_MODE) {
+            while(!PacketAvailable(HOST));
+            if(GetRxCount(HOST) == 1) {
+                mode = *GetRx(HOST);
+                TX_BUF[0] = RESP_OK;
+                TX_BUF[1] = mode;
+                SendPacket(HOST, ID_CTRL, TX_BUF, 2);
+                DelayMs(3);
+            } else {
+                TX_BUF[0] = RESP_ERROR;
+                SendPacket(HOST, ID_CTRL, TX_BUF, 1);
+            }
+            ResetRx(HOST);
         }
-        ResetRx(HOST);
-    }
 
-    switch(mode) {
-    case ECHO_MODE:
-        EchoMode();
-        break;
-    case ECHO_COUNT_MODE:
-        EchoCountMode();
-        break;
-    case REACTION_MODE:
-        ReactionMode();
-        break;
-    case SMARTCARD_MODE:
-        SmartcardMode();
-        break;
+        switch(mode) {
+        case ECHO_MODE:
+            EchoMode();
+            break;
+        case ECHO_COUNT_MODE:
+            EchoCountMode();
+            break;
+        case REACTION_MODE:
+            ReactionMode();
+            break;
+        case SMARTCARD_MODE:
+            SmartcardMode();
+            break;
+        default:
+            mode = INVALID_MODE;
+        }
     }
-
 }
 
 void ReactionMode() {
@@ -80,14 +86,9 @@ void ReactionMode() {
 
     while(1) {
         SendPacket(HOST, ID_PICC, TX_BUF, size);
-        DelayMs(1);
-        SendPacket(HOST, ID_PICC, TX_BUF+1, size);
-        DelayMs(1);
-        SendPacket(HOST, ID_PICC, TX_BUF+2, size);
-        DelayMs(1);
+        DelayMs(4);
         if(PacketAvailable(HOST)) {
-//            for(i = 0; i < 50; ++i)
-              SendPacket(HOST, ID_DEBUG, GetRx(HOST), GetRxCount(HOST));
+            SendPacket(HOST, ID_DEBUG, GetRx(HOST), GetRxCount(HOST));
             ResetRx(HOST);
             while(1);
         }

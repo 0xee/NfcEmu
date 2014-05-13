@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-06-15
--- Last update: 2014-05-09
+-- Last update: 2014-05-11
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ architecture Rtl of NfcEmu is
   signal sCfg, sStatus         : aNfcEmuCfg;
   signal sCfgValid, sUpdateCfg : std_ulogic;
   signal sEnableAcq            : std_ulogic;
-
+  signal sEnRxDebug            : std_ulogic;
 
 --------------------------------------------------------------------------------
 -- Connections Units -> Host
@@ -188,6 +188,7 @@ begin  -- Rtl
   oSDacBVal      <= sCfg.SDacB;
   oSDacUpdate    <= sUpdateCfg;
   oNfcLoadSwitch <= sPiccATxLoadSwitch;
+  sEnRxDebug     <= sCfg.Enable(cRxDebug);
 
 -------------------------------------------------------------------------------
 -- Data from host
@@ -214,6 +215,14 @@ begin  -- Rtl
 --            (sHostToPiccAValid and sHostToPiccAAck) or
 --              (sHostToPcdAValid and sHostToPcdAAck);
 
+  assert iDin.Valid /= '1' or
+    (MatchId(sFromHost.Id, cIdCpu) or
+     MatchId(sFromHost.Id, cIdCpuFw) or
+     MatchId(sFromHost.Id, cIdCtrl))
+
+    report "Illegal ID on incoming packet"
+    severity error;
+
 -------------------------------------------------------------------------------
 -- Data to host
 -------------------------------------------------------------------------------
@@ -232,21 +241,23 @@ begin  -- Rtl
     if inResetAsync = '0' then
       rDbgActive <= '0';
     elsif rising_edge(iClk) then
-      if rDbgActive then
-        if sDebugData.Ack then
-          rDbgActive <= '0';
-        end if;
-      else
-        if sHostToCpu.DPort.Eof and sHostToCpu.Ack then
-          rDbgActive <= '1';
+      if sEnRxDebug = '1' then
+        if rDbgActive then
+          if sDebugData.Ack then
+            rDbgActive <= '0';
+          end if;
+        else
+          if sHostToCpu.DPort.Eof and sHostToCpu.Ack then
+            rDbgActive <= '1';
+          end if;
         end if;
       end if;
     end if;
   end process;
 
-  sDebugData.DPort.Data <= x"EE";
-  sDebugData.DPort.Id <= x"EE";
-  sDebugData.DPort.Eof <= sDebugData.DPort.Valid;
+  sDebugData.DPort.Data  <= x"EE";
+  sDebugData.DPort.Id    <= x"EE";
+  sDebugData.DPort.Eof   <= sDebugData.DPort.Valid;
   sDebugData.DPort.Valid <= rDbgActive;
 
   sPiccARxToHost.Ack    <= sHostAck(0);
@@ -269,8 +280,8 @@ begin  -- Rtl
       oDbgSelected => open,
       oAckIn       => sHostAck);
 
-  
-  
+
+
 
   ControlReg_1 : entity misc.ControlReg(Rtl)
     generic map (
@@ -300,7 +311,7 @@ begin  -- Rtl
   sStreamIn <= iEnvelope(7 downto 0) when sCfg.Enable(cEnvelopeStream) else
                sTestData when sCfg.Enable(cTestStream) else
                (others => '-');
-  
+
   StreamPacketizer_1 : entity misc.StreamPacketizer
     generic map (
       gId     => cIdEnvelope,
@@ -332,14 +343,14 @@ begin  -- Rtl
       oDout        => sNfcFieldSteady,
       oValid       => open);
 
-  
+
   sDacDout <= unsigned(iEnvelope) & '0';
 
 --  oDacOut <= std_ulogic_vector(sDacDout);
 
-  -----------------------------------------------------------------------------
-  -- Dummy data for comm test
-  -----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+-- Dummy data for comm test
+-----------------------------------------------------------------------------
 
   TestDataGen : process (iClk, inResetAsync)
   begin  -- process TestDataGen

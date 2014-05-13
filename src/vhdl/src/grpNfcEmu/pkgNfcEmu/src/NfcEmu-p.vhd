@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-06-16
--- Last update: 2014-04-27
+-- Last update: 2014-05-11
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ package NfcEmuPkg is
   constant cIso14443aPcd   : natural := 6;
   constant cIsoLayer4Picc  : natural := 7;
   constant cIsoLayer4Pcd   : natural := 8;
-
+  constant cRxDebug        : natural := 9;
   -- ID Structure
   --       3b          5b         
   --  +–––––––––+––––––––––––––––+
@@ -78,6 +78,7 @@ package NfcEmuPkg is
   constant cIdIso14443aPcd  : std_ulogic_vector := IntToVec(cIso14443aPcd, 8);
   constant cIdIsoLayer4Picc : std_ulogic_vector := IntToVec(cIsoLayer4Picc, 8);
   constant cIdIsoLayer4Pcd  : std_ulogic_vector := IntToVec(cIsoLayer4Pcd, 8);
+  constant cIdRxDebug       : std_ulogic_vector := IntToVec(cRxDebug, 8);
 
   
   function MatchId (
@@ -109,7 +110,7 @@ package NfcEmuPkg is
   constant cFlagRxOnly       : natural := 0;  -- enable 'sniffer' mode
   constant cFlagNfcField     : natural := 1;  -- RF field enable/status
   constant cFlagUidLenDouble : natural := 2;  -- select 7 byte uid
-  constant cFlagCpuRunning : natural := 3;  -- read only, '1' when cpu is running
+  constant cFlagCpuRunning   : natural := 3;  -- read only, '1' when cpu is running
 
   type aNfcEmuCfg is record
     Enable      : aEnableReg;           -- 4
@@ -142,17 +143,17 @@ package NfcEmuPkg is
                                      ScThreshold => x"20",
                                      Uid         => x"07060504030201");
 
-  constant cReadBackMaskCfg : aNfcEmuCfg := (Enable      => (others => '1'),
-                                             Flags       => (cFlagNfcField => '0',
-                                                           cFlagCpuRunning => '0',
-                                                             others => '1'),
-                                             SDacA       => (others => '1'),
-                                             SDacB       => (others => '1'),
-                                             SDacC       => (others => '1'),
-                                             SDacD       => (others => '1'),
-                                             FieldTh     => (others => '1'),
-                                             ScThreshold => (others => '1'),
-                                             Uid         => (others => '1'));
+  constant cReadBackMaskCfg : aNfcEmuCfg := (Enable                          => (others => '1'),
+                                             Flags                           => (cFlagNfcField => '0',
+                                                             cFlagCpuRunning => '0',
+                                                             others          => '1'),
+                                             SDacA                           => (others => '1'),
+                                             SDacB                           => (others => '1'),
+                                             SDacC                           => (others => '1'),
+                                             SDacD                           => (others => '1'),
+                                             FieldTh                         => (others => '1'),
+                                             ScThreshold                     => (others => '1'),
+                                             Uid                             => (others => '1'));
 -- TODO: return pcd uid on read
   
   constant cCfgReadBackMask : std_ulogic_vector;

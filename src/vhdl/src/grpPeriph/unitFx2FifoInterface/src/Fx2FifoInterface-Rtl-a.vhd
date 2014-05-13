@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-05-31
--- Last update: 2014-05-10
+-- Last update: 2014-05-12
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -23,9 +23,7 @@ architecture Rtl of Fx2FifoInterface is
 
   signal
     sFifo2DataAvailable,
-    sFifo3DataAvailable,
     sFifo4Full : std_ulogic;
---    sFifo5Full : std_ulogic;
 
   constant cEp2Adr : std_ulogic_vector := "00";
   constant cEp4Adr : std_ulogic_vector := "01";
@@ -62,9 +60,7 @@ architecture Rtl of Fx2FifoInterface is
 begin  -- Rtl
 
   sFifo2DataAvailable <= iFx2Flags(0);
---  sFifo3DataAvailable <= iFx2Flags(1);
   sFifo4Full          <= not iFx2Flags(2);
---  sFifo5Full          <= not iFx2PA7;
 
   ioFx2Data <= std_logic_vector(sFifoDout) when sDOutEnable = '1' else
                (others => 'Z');
@@ -81,7 +77,7 @@ begin  -- Rtl
   onFx2WrStrobe <= not sFifoWr;
   onFx2RdStrobe <= not sFifoRd;
 
-  Comb : process (R, sFifo2DataAvailable, sFifo3DataAvailable, sFifoDin, sFifo4Full, iValid, iAck, iEndOfPacket)
+  Comb : process (R, sFifo2DataAvailable, sFifoDin, sFifo4Full, iValid, iAck, iEndOfPacket)
   begin  -- process Comb
     NextR       <= R;
     oAck        <= '0';
@@ -107,12 +103,12 @@ begin  -- Rtl
         
       when Idle =>
         
-        if iValid = '1' then            -- begin sending packet
-          NextR.State <= Wr;
-          
-        elsif sFifo2DataAvailable = '1' then  -- offer data to read if available
+        if sFifo2DataAvailable = '1' then  -- offer data to read if available
           NextR.State <= Rd;
+        elsif iValid = '1' then            -- begin sending packet
+          NextR.State <= Wr;
         end if;
+          
         
       when Wr =>
         oFx2FifoAdr <= cEp6Adr;

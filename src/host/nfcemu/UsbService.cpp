@@ -25,7 +25,7 @@ namespace Usb {
 
     Service::Service() : mPollingRun(true) {        
         int ret = libusb_init(&pContext);
-        libusb_set_debug(pContext, 3);
+        libusb_set_debug(pContext, LIBUSB_LOG_LEVEL_WARNING);
         if(ret) throw Error(ret, "initializing libusb context");
         pPollThread = std::unique_ptr<std::thread>(new std::thread(PollThreadFn));
     }
@@ -118,7 +118,7 @@ namespace Usb {
     }
 
     Service::~Service() {
-        Info("Shutting down USB service");
+        //D("Shutting down USB service");
         // cancel active transfers
         int cancelled = 0;
         {
@@ -130,7 +130,8 @@ namespace Usb {
             }
 
         }
-        Warning("cancelled " + lexical_cast<string>(cancelled) + " pending libusb transfers");
+
+        Info("cancelled " + lexical_cast<string>(cancelled) + " pending libusb transfers");
 
         {
             ScopedLock critical(mMtx);
@@ -162,12 +163,25 @@ namespace Usb {
                                 boost::asio::mutable_buffer buffer) throw(Error) {
 
         Transfer pT1(libusb_alloc_transfer(0));
-        Transfer pT2(libusb_alloc_transfer(0));
         auto pBuf = buffer_cast<unsigned char *>(buffer);
 
         libusb_fill_bulk_transfer(pT1, dev.GetDeviceHandle(), ep, pBuf, 
                                   buffer_size(buffer), &Service::LibusbAsyncCallback, 
                                   0, 10000000);
+        Instance().Submit(pT1, dev);
+    }
+
+    void Service::AsyncIsoRead(Device & dev, int const ep,
+                               boost::asio::mutable_buffer buffer) throw(Error) {
+
+        Transfer pT1(libusb_alloc_transfer(1));
+        auto pBuf = buffer_cast<unsigned char *>(buffer);
+
+        libusb_fill_iso_transfer(pT1, dev.GetDeviceHandle(), ep, pBuf, 
+                                 buffer_size(buffer), 1, 
+                                 &Service::LibusbAsyncCallback, 
+                                 0, 10000000);
+        libusb_set_iso_packet_lengths(pT1, buffer_size(buffer));
         Instance().Submit(pT1, dev);
     }
 
@@ -184,13 +198,13 @@ namespace Usb {
         int ret;
         try {
             if((ret = libusb_submit_transfer(p))) {
-                throw Error(ret, "submitting bulk transfer");
+                throw Error(ret, "submitting transfer");
             }
         }
         catch(Error e) {
             throw e;
         } catch(std::exception e) {
-            Error(string("Error submitting bulk transfer: ") + e.what());
+            Error(string("Error submitting transfer: ") + e.what());
             throw e;
         }
         if(xferDbg) cout << ":: Submitted transfer " << p << endl;
@@ -239,6 +253,8 @@ namespace Usb {
                 auto devIter = Instance().mActiveTransfers.find(t);
                 if(devIter != Instance().mActiveTransfers.end()) {
                     //D("transfer complete");
+
+                    // TODO: handle iso transfer length
                     devIter->second->AsyncCallback(t->actual_length);
                     Instance().mActiveTransfers.erase(t); 
                     //cout << "destroying work object" << endl;
@@ -276,6 +292,19 @@ namespace Usb {
         throw Error(ret, "in BulkRead");
     }
 
+    size_t Service::IntRead(DeviceHandle dev, int const ep,
+                             boost::asio::mutable_buffer buffer,
+                             size_t const timeout) throw(Error) {
+        ScopedLock critical(Instance().mMtx);
+        int transferred = 0;
+        auto pBuf = buffer_cast<unsigned char *>(buffer);
+        size_t maxLen = buffer_size(buffer);
+        pBuf[0] = 0x77;
+        int ret = libusb_interrupt_transfer(dev, ep | 0x80, pBuf, maxLen, &transferred, timeout);
+        if(transferred > 0 || ret == LIBUSB_ERROR_TIMEOUT) return transferred;
+        throw Error(ret, "in IntRead");
+    }
+
     void Service::BulkWrite(DeviceHandle dev, int const  ep,
                             boost::asio::const_buffer buffer, 
                             size_t const timeout) throw(Error) {
@@ -293,6 +322,71 @@ namespace Usb {
             }
         
         }
+    }
+
+    void Service::IntWrite(DeviceHandle dev, int const  ep,
+                            boost::asio::const_buffer buffer, 
+                            size_t const timeout) throw(Error) {
+        size_t sent = 0;
+        auto pBuf = const_cast<unsigned char *>(buffer_cast<unsigned char const *>(buffer));
+        while(sent < buffer_size(buffer)) {
+            int transferred = 0;
+            int ret = libusb_interrupt_transfer(dev, ep, 
+                                                pBuf+sent,
+                                                buffer_size(buffer)-sent, &transferred, timeout);
+            if(transferred) {
+                sent += transferred;
+            } else {
+                throw Error(ret, "error in intwrite");
+            }
+        
+        }
+    }
+
+    void Service::LibusbAsyncTxCallback(Transfer t) noexcept {
+        // D("blubb");
+        // switch(t->status) {
+
+        // case LIBUSB_TRANSFER_CANCELLED:            
+        //     cout << "transfer cancelled successfully" << endl;
+        //     break;
+            
+        // case LIBUSB_TRANSFER_COMPLETED:
+        //     // expected cases
+        //      cout << "transfer completed: " << endl;
+        //      break;
+
+        // case LIBUSB_TRANSFER_TIMED_OUT:
+        //     cout << "transfer timed out" << endl;
+        //     break;
+
+        // default:
+        //     Error("Error in async libusb transfer");
+        //     throw Usb::Error("in async libusb transfer");
+            
+        // }
+
+    }
+
+
+    void Service::IsoWrite(DeviceHandle dev, int const  ep,
+                            boost::asio::const_buffer buffer, 
+                            size_t const timeout) throw(Error) {
+        ScopedLock critical(Instance().mMtx); // there can only be one ;)
+
+        Transfer pT1(libusb_alloc_transfer(1));
+        auto pBuf = buffer_cast<unsigned char const *>(buffer);
+
+        libusb_fill_iso_transfer(pT1, dev, (ep & ~0x80), (unsigned char*)pBuf, 
+                                 buffer_size(buffer), 1, 
+                                 &Service::LibusbAsyncTxCallback, 
+                                 0, 10000000);
+        libusb_set_iso_packet_lengths(pT1, buffer_size(buffer));
+        int ret;
+        if((ret = libusb_submit_transfer(pT1))) {
+            throw Error(ret, "submitting iso transfer");
+        }
+            
     }
 
     void Service::ControlMessage(DeviceHandle dev, 

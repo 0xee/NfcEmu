@@ -32,11 +32,22 @@ namespace Usb {
 
         static void AsyncBulkRead(Device & dev, int const ep,
                                   boost::asio::mutable_buffer buffer) throw(Error);
+        static void AsyncIsoRead(Device & dev, int const ep,
+                                  boost::asio::mutable_buffer buffer) throw(Error);
+        // static void AsyncIntRead(Device & dev, int const ep,
+        //                           boost::asio::mutable_buffer buffer) throw(Error);
         
         static size_t BulkRead(DeviceHandle dev, int const ep,
                                boost::asio::mutable_buffer buffer,
                                size_t const timeout) throw(Error);
+        static size_t IntRead(DeviceHandle dev, int const ep,
+                               boost::asio::mutable_buffer buffer,
+                               size_t const timeout) throw(Error);
         static void BulkWrite(DeviceHandle dev, int const  ep, boost::asio::const_buffer buffer, 
+                              size_t const timeout) throw(Error);
+        static void IntWrite(DeviceHandle dev, int const  ep, boost::asio::const_buffer buffer, 
+                              size_t const timeout) throw(Error);
+        static void IsoWrite(DeviceHandle dev, int const  ep, boost::asio::const_buffer buffer, 
                               size_t const timeout) throw(Error);
 
         static DeviceHandle OpenDevice(int const vid, int const pid, int const index);
@@ -64,7 +75,7 @@ namespace Usb {
 
         static void PollThreadFn();
         static void LibusbAsyncCallback(libusb_transfer * pT) noexcept;
-
+        static void LibusbAsyncTxCallback(libusb_transfer * pT) noexcept;
         void Submit(Transfer const & p, Device & dev, bool const resubmit = false);
 
         std::unique_ptr<std::thread> pPollThread;

@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-09-13
--- Last update: 2014-04-27
+-- Last update: 2014-05-11
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -120,13 +120,14 @@ architecture Rtl of Iso14443_4 is
   signal sTx                    : aDataPort;
   signal rInitialized           : std_ulogic;
 
-  
+  signal sCpuToHostBuffered : aDataPortConnection;
+    
 begin  -- architecture Rtl
 
   sInputPorts(0) <= iHostIn;
   oHostInAck       <= sInputAck(0);
-  oHostOut       <= sOutputPorts(0);
-  sOutputAck(0)  <= iHostOutAck;--sOutputPorts(0).Valid;
+  oHostOut       <= sCpuToHostBuffered.DPort;
+  sCpuToHostBuffered.Ack  <= iHostOutAck;--sOutputPorts(0).Valid;
 
   sInputPorts(1) <= iRx;
 
@@ -151,6 +152,19 @@ begin  -- architecture Rtl
 
   sCrcValidOut <= '1' when rCrcSendProgress /= 0 else
                   '0';
+
+ CpuToHostBuffer : entity misc.Fifo(Rtl)
+    generic map (
+      gDepth => 16)
+    port map (
+      iClk         => iClk,
+      inResetAsync => inResetAsync,
+      iDin         => sOutputPorts(0),
+      oAck         => sOutputAck(0),
+      oDout        => sCpuToHostBuffered.DPort,
+      iAck         => sCpuToHostBuffered.Ack);
+
+
   
   CrcA_1 : entity nfc.CrcA(Rtl)
     port map (

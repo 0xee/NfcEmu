@@ -24,6 +24,8 @@
 #define CMD_RESET_FPGA 0xC1
 #define CMD_ACK_RESET 0xA1
 
+#define ALT_SETTING 1  // 3
+
 void ResetFifos() {
 	FIFORESET = 0x80;  SYNCDELAY;  // NAK all requests from host. 
 	FIFORESET = 0x82;  SYNCDELAY;  // Reset individual EP (2,4,6,8)
@@ -72,16 +74,24 @@ static void Initialize(void)
 	PINFLAGSCD = 0xfe;  // FLAGC = EP6 FF (full flag); FLAGD = EP8 FF
 	SYNCDELAY;
 
+#if ALT_SETTING == 1
 	EP1INCFG=0xa0;		// EP1 bulk IN  
 	EP1OUTCFG=0xa0;		// EP1 bulk OUT
-	EP2CFG=0xa0;  // 1010 0010 (bulk OUT, 512 bytes, double-buffered)
-	EP6CFG=0xe0;  // 1110 0010 (bulk IN, 512 bytes, double-buffered)
+	EP2CFG=0xa0;  //  (bulk OUT, 512 bytes, double-buffered)
+	EP6CFG=0xe0;  //  (bulk IN, 512 bytes, double-buffered)
+#elif ALT_SETTING == 3
+	EP1INCFG=0xb0;		// EP1 int IN  
+	EP1OUTCFG=0xb0;		// EP1 int OUT
+	EP2CFG=0x90;  // (iso OUT, 512 bytes, double-buffered)
+	EP6CFG=0xd0;  // (iso IN, 512 bytes, double-buffered)
+#endif
+
 	SYNCDELAY;
 
     ResetFifos();
    
 	
-	EP1OUTBC=0xff; // arm endpoint 1 for OUT (host->device) transfers
+	EP1OUTBC=0x1; // arm endpoint 1 for OUT (host->device) transfers
 	SYNCDELAY;
 
 

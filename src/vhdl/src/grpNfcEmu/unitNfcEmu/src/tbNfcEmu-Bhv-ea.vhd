@@ -31,7 +31,7 @@ architecture Bhv of tbNfcEmu is
   signal sSerialIn                : std_ulogic_vector(7 downto 0);
   signal sSerialValid, sSerialAck : std_ulogic;
   signal sRealDin                 : aDataPortConnection;
-  signal sDout                     : aDataPortConnection;
+  signal sDout                    : aDataPortConnection;
 
   signal iEnvelope      : std_ulogic_vector(8 downto 0);
   signal iEnvelopeValid : std_ulogic;
@@ -58,7 +58,7 @@ begin  -- Bhv
   SimCtrl_1 : entity misc.SimCtrl(Bhv)
     generic map (
       gClkFreq    => cNfcClkFreq,
-      gWdtTimeout => 4 ms)
+      gWdtTimeout => 2 ms)
     port map (
       oClk      => iClk,
       onReset   => inResetAsync,
@@ -107,8 +107,8 @@ begin  -- Bhv
       oAckIn       => sSerialAck,
       oDout        => sRealDin.DPort,
       iAckOut      => sRealDin.Ack);
-
-  
+  --sRealDin.DPort <= sDin.DPort;
+  --sDin.Ack <= sRealDin.Ack;
   ROM52_1 : entity fw.ROM52(Rtl)
     port map (
       Clk => sRomClk,
@@ -225,7 +225,6 @@ begin  -- Bhv
 
     variable vMsg : std_ulogic_vector(23 downto 0) := x"030201";
     constant cD   : natural                        := 400/8;
-
   begin  -- process Stimuli
     InitNfcEmu;
 
@@ -233,14 +232,15 @@ begin  -- Bhv
     UpdateT51;
     report "success";
 
-    
+
     wait for 200 us;
-    SendP(x"00", cIdCpu);
-    for i in 0 to 100 loop    
-      SendP(FlipBytes(IntToVec(i, 16)), cIdCpu);
-    end loop;  -- i
+    SendP(x"03", cIdCpu);
+    wait for 1 ms;
+    report "-------------------- Sending command --------------------";
+    SendP(FlipBytes(x"07070707"), cIdCpu);
 
 
+    wait;
     report "Feeding adc input from file";
     FeedAdcInput;
 
@@ -259,6 +259,7 @@ begin  -- Bhv
     begin
       ExpectPacket(sDout.DPort, iClk, Packet);
     end;
+    variable vBreak : boolean;
   begin  -- process Output
     sWdtReset                   <= not sWdtReset;
     vCfg.Enable(cIso14443aPicc) := '1';
@@ -279,19 +280,20 @@ begin  -- Bhv
 
     Exp(x"08");                         -- t51 ready
 
-    
-    Exp(FlipBytes(x"0000"));             -- mode ack
-        for i in 0 to 100 loop
-          Exp(FlipBytes(IntToVec(i, 8)));
-          Exp(FlipBytes(IntToVec(i, 16)));
-    end loop;  -- i
 
---    Exp(FlipBytes(x"0A0B0C0D0E0F"));    -- echo test
+    Exp(FlipBytes(x"0003"));            -- mode ack
+
+    
+    wait until sDout.DPort.Id = x"25";
+    wait until sDout.DPort.Id = x"E1";
+      
+    Exp(FlipBytes(x"07070707"));      -- echo test
+    sWdtReset <= not sWdtReset;
+    
 --    Exp(FlipBytes(x"0001"));             -- mode ack
---    Exp(FlipBytes(x"0A0B0C0D0E0F"));    -- echo test
 
     report "end of init phase";
-      
+
     if cSnifferMode then
 
       Exp(x"26");                       -- REQA
@@ -305,7 +307,7 @@ begin  -- Bhv
       sWdtReset <= not sWdtReset;
 
       Exp(FlipBytes(x"937088058A2225047E"));  -- select 2
-      Exp(FlipBytes(x"24D836"));        -- SAK
+      Exp(FlipBytes(x"24D836"));              -- SAK
 
       Exp(FlipBytes(x"9520"));          -- select 3
       Exp(FlipBytes(x"2700000027"));    -- ???

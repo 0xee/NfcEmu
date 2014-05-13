@@ -53,7 +53,7 @@ namespace NfcEmu {
                 ++leading;
             }
 
-            if(leading) D("Leading bytes: " + std::to_string(leading));
+            //if(leading) D("Leading bytes: " + std::to_string(leading));
             if(first == last || !FindEnd(first, last, packetEnd)) {
                 // D("no packet in buffer");
                 return nullptr;
