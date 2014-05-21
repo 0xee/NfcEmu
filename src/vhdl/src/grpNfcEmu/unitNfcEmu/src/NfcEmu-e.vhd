@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-06-15
--- Last update: 2014-04-03
+-- Last update: 2014-05-15
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ entity NfcEmu is
     oAckIn         : out std_ulogic;
     oDout        : out aDataPort;
     iAckOut         : in  std_ulogic;
-
+    oTsOut : out std_ulogic_vector(31 downto 0);
     oDacOut : out std_ulogic_vector(9 downto 0);
 
     iEnvelope : in std_ulogic_vector(8 downto 0);
@@ -45,7 +45,8 @@ entity NfcEmu is
     oSDacUpdate : out std_ulogic;
     oSDacEnableCD : out std_ulogic;
     iSDacAck : in std_ulogic;
-    oNfcLoadSwitch : out std_ulogic
+    oNfcLoadSwitch : out std_ulogic;
+    oTest : out std_ulogic
     );
 
 end NfcEmu;

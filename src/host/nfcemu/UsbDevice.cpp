@@ -9,6 +9,8 @@
 
 #include "UsbService.h"
 #include <iostream>
+#include <cassert>
+#include "Debug.h"
 
 using namespace std;
 using namespace boost::asio;
@@ -28,6 +30,7 @@ namespace Usb {
         CancelAsync();
         Service::ReleaseInterface(mDev, interface);
         Service::CloseDevice(mDev);
+
     }
 
     bool Device::IsConnected() const {
@@ -36,19 +39,21 @@ namespace Usb {
 
     void Device::AsyncBulkRead(int const ep, boost::asio::mutable_buffer buffer, 
                                ReadCallback::slot_type & callback) throw(Error) {
-        mReadCallback.disconnect_all_slots();
-        mReadCallback.connect(callback);
+        //D("bulkread");
+        mBulkReadCallback.disconnect_all_slots();
+        mBulkReadCallback.connect(callback);
         Service::AsyncBulkRead(*this, ep, buffer);
     }
 
     void Device::AsyncIsoRead(int const ep, boost::asio::mutable_buffer buffer, 
                                ReadCallback::slot_type & callback) throw(Error) {
-        mReadCallback.disconnect_all_slots();
-        mReadCallback.connect(callback);
+        mIsoReadCallback.disconnect_all_slots();
+        mIsoReadCallback.connect(callback);
         Service::AsyncIsoRead(*this, ep, buffer);
     }
 
     void Device::CancelAsync() {
+        mBulkReadCallback.disconnect_all_slots();
         Service::CancelByDevice(*this);
     }
 

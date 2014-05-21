@@ -63,8 +63,8 @@ typedef struct {
 } WtxContext;
 
                        
-#define SWTX_INTERVAL_MS 60L
-#define SWTX_INTERVAL (60L)*(SWTX_INTERVAL_MS)
+#define SWTX_INTERVAL_MS 10L
+#define SWTX_INTERVAL (360L)*(SWTX_INTERVAL_MS)
                        
                        
                        
@@ -95,7 +95,7 @@ static int8_t HandleWtx(WtxContext * wtx) {
             return -1;
         }
         wtx->missingAcks = 0;
-        SendDebug(D_WTX_ACK);
+        //SendDebug(D_WTX_ACK);
         
         ResetRx(PICC);
         return 0;
@@ -105,6 +105,7 @@ static int8_t HandleWtx(WtxContext * wtx) {
 }
 
 volatile uint8_t __xdata apduBuf[256];
+uint16_t apduLen;
 
 void IsoInit() {
     piccRx = GetRx(PICC);
@@ -123,6 +124,10 @@ void IsoProcessPcd(void) {
             SendDebug(D_CRC_ERROR);
             return;
         }
+    } else {
+        ResetRx(PICC);
+        SendDebug(D_INVALID_PACKET);
+        return;
     }
 
     switch(piccRx[0] & BLOCK_MASK) {
@@ -176,14 +181,15 @@ static void SendAts(void) {
 
 static volatile WtxContext sWtx;
 
+
 static void ProcessIBlock() {    
     uint8_t apduOffset = 1;
     int8_t needSwtxAck = 0;
     uint8_t responseComplete = 0;
     uint8_t pcb = piccRx[0];
     uint8_t cid = 0;
-    uint16_t apduLen;
     uint16_t spinCount;
+    uint8_t i;
     iBlockReceived = 1;
     blockNumber ^= 1;
     ResetRx(HOST);
@@ -199,28 +205,51 @@ static void ProcessIBlock() {
 
     ResetRx(PICC);
     needSwtxAck = 0;
-    spinCount = SWTX_INTERVAL;
+    spinCount = SWTX_INTERVAL/2;
     /* SendSwtx(); */
     /* needSwtxAck = 1; */
     // send apdu to host
-
+    //SendDebug(D_GEN_0);
 
     // wait for response
     while(1) {
-        
-        if(needSwtxAck) {
+        P0 = 0;
+
+        if(needSwtxAck != 0) {
             while(!PacketAvailable(PICC));
-            if(piccRx[0] != WTX_RESPONSE) {
-                SendDebug(D_NAK_RECEIVED);
-                return;
-            } else {
-//                SendDebug(D_WTX_ACK);
+            /* SendDebug(D_GEN_2); */
+            /* SendDebug(GetRxCount(PICC)); */
+
+            P0 = 1;
+            if(piccRx[0] == WTX_RESPONSE) {
+                /* for(i = 0; i < 4; ++i) { */
+                /*     if(piccRx[i] != expSwtx[i]) { */
+                /*         //SendDebug(D_GEN_1); */
+                /*         //                SendDebug(i); */
+                /*         //               SendDebug(piccRx[i]); */
+                /*         break; */
+                /*     } */
+                /* } */
+                //SendDebug(D_WTX_ACK);
                 needSwtxAck = 0;
                 spinCount = SWTX_INTERVAL;
+                //           SendDebug(GetRxCount(PICC));
                 ResetRx(PICC);
+            } else {
+                SendDebug(D_NAK_RECEIVED);
+                return;
             }
         } else {
             
+            if(PacketAvailable(PICC)) { // NAK or stray packet
+                if(IS_NAK(piccRx[0])) {
+                    SendDebug(D_NAK_RECEIVED);
+                    return;
+                }
+                ResetRx(PICC);
+                SendDebug(D_ERR);
+            }
+
             if(spinCount == 0) {
                 SendSwtx();
                 needSwtxAck = 1;
@@ -229,43 +258,43 @@ static void ProcessIBlock() {
             --spinCount;
 
             if(PacketAvailable(HOST)) {  // host sent (last part of) response
-                TX_BUF[0] = 0x02 | blockNumber;                      // PCB
-                TX_BUF[1] = 0x6A;
-                TX_BUF[2] = 0x82;
-                memcpy(TX_BUF+apduOffset, hostRx, GetRxCount(HOST)); // APDU data
-                AppendCrc(TX_BUF, GetRxCount(HOST)+apduOffset);  // CRC
-
-                SendPacket(PICC, 0, TX_BUF,  GetRxCount(HOST) +apduOffset+2);
+                //   SendPacket(HOST, ID_DEBUG, GetRx(HOST), GetRxCount(HOST));
+                apduBuf[0] = 0x02 | blockNumber;                      // PCB
+                apduLen = GetRxCount(HOST);
+                memcpy(apduBuf+apduOffset, hostRx, apduLen); // APDU data
+                apduLen += apduOffset;
+                AppendCrc(apduBuf, apduLen);  // CRC
+                apduLen += 2;
+                SendPacket(PICC, 0, apduBuf,  apduLen);
                 ResetRx(HOST);
                 return;
             }
         }
     }
-        /* else if(GetRxCount(HOST) == (BUFSIZE-1))  { // host sent part of response */
-        /*     while(1) { SendDebug(D_ERR); } */
-        /*     TX_BUF[0] = 0x12 | blockNumber; // PCB w/ chaining bit */
-        /*     memcpy(TX_BUF+apduOffset, hostRx, GetRxCount(HOST)); // APDU data */
-        /*     ComputeCrc(TX_BUF, GetRxCount(HOST)+apduOffset);  // CRC */
-        /*     SendPacket(PICC, 0, TX_BUF, GetRxCount(HOST)+apduOffset+2); */
-        /*     ResetRx(HOST);             */
+    /* else if(GetRxCount(HOST) == (BUFSIZE-1))  { // host sent part of response */
+    /*     while(1) { SendDebug(D_ERR); } */
+    /*     TX_BUF[0] = 0x12 | blockNumber; // PCB w/ chaining bit */
+    /*     memcpy(TX_BUF+apduOffset, hostRx, GetRxCount(HOST)); // APDU data */
+    /*     ComputeCrc(TX_BUF, GetRxCount(HOST)+apduOffset);  // CRC */
+    /*     SendPacket(PICC, 0, TX_BUF, GetRxCount(HOST)+apduOffset+2); */
+    /*     ResetRx(HOST);             */
 
-        /*     // wait for ack */
-        /*     while(!PacketAvailable(PICC)); */
-        /*     if(IS_NAK(piccRx[0])) {  */
-        /*         SendDebug(D_NAK_RECEIVED); */
-        /*         return; */
-        /*     } else if(IS_ACK(piccRx[0])) { */
-        /*         SendDebug(D_ACK_RECEIVED); */
-        /*     } */
-        /*     ResetRx(PICC);  */
-        /*     blockNumber ^= 1; */
+    /*     // wait for ack */
+    /*     while(!PacketAvailable(PICC)); */
+    /*     if(IS_NAK(piccRx[0])) {  */
+    /*         SendDebug(D_NAK_RECEIVED); */
+    /*         return; */
+    /*     } else if(IS_ACK(piccRx[0])) { */
+    /*         SendDebug(D_ACK_RECEIVED); */
+    /*     } */
+    /*     ResetRx(PICC);  */
+    /*     blockNumber ^= 1; */
 
-        /* }  */
+    /* }  */
 
 
 
 }
-
 
 static void ProcessRBlock() {
     if(piccRx[0] & R_NAK) {
@@ -283,6 +312,9 @@ static void ProcessRBlock() {
         AppendCrc(TX_BUF, 1);
         SendPacket(PICC, 0, TX_BUF, 3);
     } else {
+        // retransmit last apdu?
+        
+        SendPacket(PICC, 0, apduBuf,  apduLen);      
         SendDebug(D_ACK_RECEIVED);
     }
     ResetRx(PICC);

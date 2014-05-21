@@ -59,6 +59,7 @@ BOOST_PYTHON_MODULE(nfcemu)
         .def("AddDisplayLog", &PyWrapper::AddDisplayLog)
         .def("RemoveLog", &PyWrapper::RemoveLog)
         .def("ConnectSocket", &PyWrapper::ConnectSocket, ConnectSocketOverloads())
+        .def("DisconnectSocket", &PyWrapper::DisconnectSocket)
         .def("Test", &PyWrapper::Test)        
         ;
 

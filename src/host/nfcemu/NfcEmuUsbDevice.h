@@ -15,6 +15,7 @@
 #include <boost/asio.hpp>
 #include "Util.h"
 #include "Debug.h"
+#include <atomic>
 
 #define LOCK_SCOPE Util::ScopedLock critical(mMtx)
 
@@ -28,6 +29,7 @@ namespace NfcEmu {
                         std::string const & fx2FwFile);
 
         ~UsbDevice() { 
+            mCanContinue.store(false);
             //std::cout << "usb device dtor" << std::endl;
             Close();
         }
@@ -54,23 +56,10 @@ namespace NfcEmu {
         bool IsOpen() const;
 
         void StartAsyncRead() {
-            StartAsyncRead2(1);
-        }
-        void StartAsyncRead2(size_t const buffer = 0) {
-            /// @todo: protect usb device on reentrance
-            if(buffer == 1 || buffer == 0) {
-                Usb::Device::ReadCallback::slot_type slot =
-                    boost::bind(&UsbDevice::ReadCallback1, this, _1);
-                fx2.AsyncBulkRead(0x86, boost::asio::buffer(mReadBuf1, mReadBuf1.size()), slot);
-            }
-            if(buffer == 2 || buffer == 0) {
-                Usb::Device::ReadCallback::slot_type slot =
-                    boost::bind(&UsbDevice::ReadCallback2, this, _1);
-                fx2.AsyncBulkRead(0x86, boost::asio::buffer(mReadBuf2, mReadBuf1.size()), slot);
-            }
-
+            Usb::Device::ReadCallback::slot_type slot =
+                boost::bind(&UsbDevice::ReadCallback, this, _1);
+            fx2.AsyncBulkRead(0x86, boost::asio::buffer(mReadBuf, mReadBuf.size()), slot);
             //std::cout << "start async read" << std::endl;
-
         }
 
     private:
@@ -79,32 +68,24 @@ namespace NfcEmu {
         UsbDevice & operator=(UsbDevice &);
 
 
-        void ReadCallback1(size_t nRead) {
+    void ReadCallback(size_t nRead) {
+        if(mCanContinue.load()) {
             LOCK_SCOPE;
             //D("read callback: " + std::to_string(nRead));
             if(nRead) {
-                copy(mReadBuf1.begin(), mReadBuf1.begin()+nRead, back_inserter(mPacketBuf));
-                //std::cout << "Read cb: " << Util::FormatHex(mReadBuf.begin(), mReadBuf.begin()+nRead) << std::endl;
+                //D(std::string("rx: ") + Util::FormatHex(mReadBuf1.begin(), mReadBuf1.begin()+nRead));
+                copy(mReadBuf.begin(), mReadBuf.begin()+nRead, back_inserter(mPacketBuf));
                 OnRx();
             }
-            StartAsyncRead2(1);
+            StartAsyncRead();
         }
+    }
 
-        void ReadCallback2(size_t nRead) {
-            LOCK_SCOPE;
-            //D("read callback: " + std::to_string(nRead));
-            if(nRead) {
-                copy(mReadBuf2.begin(), mReadBuf2.begin()+nRead, back_inserter(mPacketBuf));
-                //std::cout << "Read cb: " << Util::FormatHex(mReadBuf.begin(), mReadBuf.begin()+nRead) << std::endl;
-                OnRx();
-            }
-            StartAsyncRead2(2);
-        }
-
-        std::vector<unsigned char> mReadBuf1, mReadBuf2;
-        std::mutex mMtx;
-        CypressFx2 fx2;
+    std::vector<unsigned char> mReadBuf;
+    std::atomic<bool> mCanContinue;
+    std::mutex mMtx;
+    CypressFx2 fx2;
     
-    };
+};
 }
 #endif /* NFCEMUUSBDEVICE_H */

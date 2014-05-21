@@ -45,8 +45,8 @@ package Global is
   type aSchedulerType is (RoundRobin,   -- normal round robin w/o priorities
                           StaticFirstOnly,   -- selects only the first
                                              -- resource, for debugging
-                          OrderedPriority);  -- selects by numerical order, not deadline safe
-
+                          OrderedPriority,  -- selects by numerical order, not deadline safe
+                          EarliestFirst);
 
   subtype aUnitId is std_ulogic_vector(cIdWidth-1 downto 0);
 
@@ -67,6 +67,7 @@ package Global is
 
   type aDataPortConnectionArray is array (natural range <>) of aDataPortConnection;
 
+  
   constant cEmptyPort : aDataPort := (Id    => (others => '-'),
                                       Data  => (others => '-'),
                                       Valid => '0',
@@ -82,6 +83,7 @@ package Global is
   function ToDataPort(constant cVec   : in std_ulogic_vector;
                       constant cValid : in std_ulogic) return aDataPort;
 
+  
   procedure InitPort (signal sPort : out aDataPort);
   procedure SendDebugMsg (signal sPort  : out aDataPort;
                           constant cId  : in  aUnitId;

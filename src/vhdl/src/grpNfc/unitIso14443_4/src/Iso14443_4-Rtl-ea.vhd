@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-09-13
--- Last update: 2014-05-11
+-- Last update: 2014-05-15
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -52,7 +52,8 @@ entity Iso14443_4 is
     oHostInAck : out std_ulogic;
     iFwIn    : in  aDataPort;
     oFwAck   : out std_ulogic;
-    oCpuRunning : out std_ulogic
+    oCpuRunning : out std_ulogic;
+    oCpuGpio : out std_ulogic
     );
 
 end Iso14443_4;
@@ -134,28 +135,30 @@ begin  -- architecture Rtl
   oTx <= sTx;
 
   sTx.Id   <= sOutputPorts(1).Id;
-  sTx.Data <= sCrcA(7 downto 0) when rCrcSendProgress = 1 else
-              sCrcA(15 downto 8) when rCrcSendProgress = 2 else
+  sTx.Data <= --sCrcA(7 downto 0) when rCrcSendProgress = 1 else
+              --sCrcA(15 downto 8) when rCrcSendProgress = 2 else
               sOutputPorts(1).Data;
   
   
-  sTx.Valid <= sOutputPorts(1).Valid or sCrcValidOut;
-  sTx.Eof   <= sOutputPorts(1).Eof when sEnableCrc = '0' else
-               '1' when rCrcSendProgress = 2 else
-               '0';
+  sTx.Valid <= sOutputPorts(1).Valid;-- or sCrcValidOut;
+  sTx.Eof   <= sOutputPorts(1).Eof; --;when sEnableCrc = '0' else
+               --;'1' when rCrcSendProgress = 2 else
+               --'0';
 
   sOutputAck(1) <= iTxAck;
 
   oSelected <= '0';
 
-  sEnableCrc <= sP0Out(0) and sOutputPorts(1).Valid;
+  sEnableCrc <= sP0Out(1) and sOutputPorts(1).Valid and sOutputAck(1);
 
+  oCpuGpio <= sP0Out(0);
+  
   sCrcValidOut <= '1' when rCrcSendProgress /= 0 else
                   '0';
 
  CpuToHostBuffer : entity misc.Fifo(Rtl)
     generic map (
-      gDepth => 16)
+      gDepth => 128)
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,
@@ -179,7 +182,7 @@ begin  -- architecture Rtl
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,
-      iDin         => sP0Out(0),
+      iDin         => sEnableCrc,
       iValid       => '1',
       oRising      => open,
       oFalling     => sSendCrc);

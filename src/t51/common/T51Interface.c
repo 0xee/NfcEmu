@@ -8,7 +8,6 @@
  */
 
 #include "T51Interface.h"
-#include "DebugCodes.h"
 
 typedef struct T51Port T51Port;
 struct T51Port {
@@ -21,7 +20,7 @@ struct T51Port {
 };
 
 
-T51Port __xdata volatile * const pPorts = IF_BASE_ADDRESS;
+T51Port __xdata volatile * volatile const pPorts = IF_BASE_ADDRESS;
 
 uint8_t __xdata txBuf[BUFSIZE];
 
@@ -67,8 +66,8 @@ void SendPacket(uint8_t const port, uint8_t const id,
     if(!len) return;
 
     SetId(port, id);
-    for(i = 0; i < len-1; ++i) {                            
-        Send(port, buf[i]);                                   
+    for(i = 0; i < len-1; ++i) {
+        Send(port, buf[i]);
     }                                                             
     SetEof(port);
     Send(port, buf[i]);                                    
@@ -87,5 +86,4 @@ void IfInit(void) {
         ResetRx(i);
     }
     SetId(HOST, ID_DEBUG);
-    SendDebug(D_T51_READY);
 }

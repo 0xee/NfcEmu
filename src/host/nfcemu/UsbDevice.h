@@ -13,7 +13,7 @@
 #include <list>
 #include <boost/asio.hpp>
 #include <boost/signals2.hpp>
-
+#include "Debug.h"
 #include "UsbTypes.h"
 
 namespace Usb {
@@ -66,8 +66,7 @@ namespace Usb {
                            unsigned short const index,
                            unsigned char * pData,
                            unsigned short length) throw(Error);
-                       
-
+        
         DeviceHandle & GetDeviceHandle() noexcept { return mDev; }
         boost::asio::io_service & IoService() { return mIoService; }
 
@@ -77,21 +76,22 @@ namespace Usb {
         
     protected:
         void CbDispatcher(size_t const len) {            
-            mReadCallback(len);
+            mBulkReadCallback(len);
         }
 
 
 
         boost::asio::io_service & mIoService;
         /// @todo: enable multiple concurrent transfers (eg on different endpoints)
-        ReadCallback mReadCallback;
+        ReadCallback mBulkReadCallback;
+        ReadCallback mIsoReadCallback;
 
     private:
+        std::mutex mMtx;
         DeviceHandle mDev;
         int interface, altSetting;
         libusb_transfer mAsyncTransfer;
         static std::list<libusb_device_handle *> openHandles;
-
     };
 
 } // namespace Usb

@@ -3,7 +3,7 @@
 
 #include "../common/T51Interface.h"
 #include "iso.h"
-#include "../common/DebugCodes.h"
+#include "DebugCodes.h"
 
 
 //delays for about t * 1/2 us
@@ -37,6 +37,7 @@ void main(void)
     P0 = 0x00;
 
     IfInit();
+    SendDebug(D_T51_READY);
  
     while(1) {
 
@@ -77,7 +78,7 @@ void main(void)
 
 void ReactionMode() {
     uint8_t i;
-    uint8_t const size = 6;
+    uint8_t const size = 5;
     TX_BUF[0] = 0xAA;
     
     for(i = 1; i < size+2; ++i) {
@@ -86,10 +87,12 @@ void ReactionMode() {
 
     while(1) {
         SendPacket(HOST, ID_PICC, TX_BUF, size);
-        DelayMs(4);
+//         DelayMs(30);
         if(PacketAvailable(HOST)) {
             SendPacket(HOST, ID_DEBUG, GetRx(HOST), GetRxCount(HOST));
             ResetRx(HOST);
+            TX_BUF[0] = 0;
+            SendPacket(HOST, ID_PICC, TX_BUF, 1);
             while(1);
         }
 
@@ -98,14 +101,18 @@ void ReactionMode() {
 }
 
 void EchoMode() {
-    uint16_t n = 300;
+    uint16_t n = 0;
     uint8_t x;
+    P0 = 1;
     while(1) {
+        P0 = 1;
         while(!PacketAvailable(HOST));
-        //SendDebug(n++);
+        P0 = 0;
         x = GetRxCount(HOST);
         SendPacket(HOST, ID_DEBUG, GetRx(HOST), x);
+//        SendPacket(HOST, ID_DEBUG, GetRx(HOST), x);
         ResetRx(HOST);            
+//        SendDebug(n++);
     }
 }
 
@@ -136,8 +143,9 @@ void SmartcardMode() {
          if(PacketAvailable(PICC)) {
              IsoProcessPcd();
 //            DelayMs(3);
-             SendDebug(D_PACKET_PROCESSED);
+             //SendDebug(D_PACKET_PROCESSED);
          }
     }
  } 
+
 

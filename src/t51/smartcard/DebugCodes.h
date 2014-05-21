@@ -10,7 +10,7 @@
 #ifndef DEBUGCODES_H
 #define DEBUGCODES_H
 
-
+#define D_INVALID_PACKET 6
 #define D_CRC_ERROR 7
 #define D_T51_READY 8
 #define D_ISO_L4_ACTIVATED 9
@@ -20,10 +20,10 @@
 #define D_NAK_RECEIVED 13
 #define D_ISO_DESELECT 14
 #define D_WTX_ACK      15
-#define D_GEN_0        16
-#define D_GEN_1        17
-#define D_GEN_2        18
-#define D_GEN_3        13
+#define D_GEN_0        0xA0
+#define D_GEN_1        0xA1
+#define D_GEN_2        0xA2
+#define D_GEN_3        0xA3
 
 #define D_ERR 255
 

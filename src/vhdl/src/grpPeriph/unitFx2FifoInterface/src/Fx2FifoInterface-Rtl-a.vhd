@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-05-31
--- Last update: 2014-05-12
+-- Last update: 2014-05-22
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ architecture Rtl of Fx2FifoInterface is
   constant cEp6Adr : std_ulogic_vector := "10";
   constant cEp8Adr : std_ulogic_vector := "11";
 
-  constant cPacketTimeout : natural := 48*12000;
+  constant cPacketTimeout : natural := 48*500;
 
   signal sFifoDin, sFifoDout     : std_ulogic_vector(7 downto 0);
   signal sDOutEnable, sDInEnable : std_ulogic;
@@ -77,6 +77,11 @@ begin  -- Rtl
   onFx2WrStrobe <= not sFifoWr;
   onFx2RdStrobe <= not sFifoRd;
 
+      --onFx2PktEnd <= '0' when R.EofTimeout = 1 else
+      --               '1';   
+  
+  
+  
   Comb : process (R, sFifo2DataAvailable, sFifoDin, sFifo4Full, iValid, iAck, iEndOfPacket)
   begin  -- process Comb
     NextR       <= R;
@@ -89,16 +94,14 @@ begin  -- Rtl
     oFx2FifoAdr <= cEp2Adr;
 
     onFx2PktEnd <= '1';
-    --if R.EofTimeout = 0 then
-    --  onFx2PktEnd <= '0';
-    --  NextR.EofTimeout <= cPacketTimeout-1;
-    --else
-    --  NextR.EofTimeout <= R.EofTimeout - 1;
-    --end if;
+    
+    if R.EofTimeout /= 0 then
+      NextR.EofTimeout <= R.EofTimeout - 1;
+    end if;
 
     case R.State is
       when Init =>
-        onFx2PktEnd <= '0';
+    --    onFx2PktEnd <= '0';
         NextR.State <= Idle;
         
       when Idle =>
@@ -119,9 +122,9 @@ begin  -- Rtl
             oAck        <= '1';
             if iEndOfPacket = '1' then
               --if R.EofTimeout = 0 then
-              --  NextR.EofTimeout <= cPacketTimeout-1;
-              --end if;
-              onFx2PktEnd <= '0';
+              NextR.EofTimeout <= cPacketTimeout-1;
+            --end if;
+                     onFx2PktEnd <= '0';
               NextR.State <= Idle;
             end if;
           end if;

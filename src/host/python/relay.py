@@ -1,10 +1,7 @@
 #!/bin/python
 
 import time
-import sys
 import socket
-import array
-
 from nfcemu import *
 
 def GetUid(fd):
@@ -20,6 +17,8 @@ emu.OpenUsbDevice("../../vhdl/src/grpNfcEmu/unitTbdNfcEmu/synlay/TbdNfcEmu.sof")
 emu.SendIHexFile(Id.CpuFw, "../../t51/smartcard/smartcard.ihx")
 
 emu.AddDisplayLog(Id.Any)
+
+
 emu.SetUnitEnable(Id.Iso14443aPicc, False)
 
 emu.SendCmd(Id.Cpu, [2], 100)

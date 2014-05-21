@@ -152,7 +152,7 @@ BEGIN
 		clk0_phase_shift => "0",
 		clk1_divide_by => 1,
 		clk1_duty_cycle => 50,
-		clk1_multiply_by => 3,
+		clk1_multiply_by => 2,
 		clk1_phase_shift => "0",
 		compensate_clock => "CLK0",
 		gate_lock_signal => "NO",
@@ -241,7 +241,7 @@ END SYN;
 -- Retrieval info: PRIVATE: DUTY_CYCLE0 STRING "50.00000000"
 -- Retrieval info: PRIVATE: DUTY_CYCLE1 STRING "50.00000000"
 -- Retrieval info: PRIVATE: EFF_OUTPUT_FREQ_VALUE0 STRING "108.480003"
--- Retrieval info: PRIVATE: EFF_OUTPUT_FREQ_VALUE1 STRING "40.680000"
+-- Retrieval info: PRIVATE: EFF_OUTPUT_FREQ_VALUE1 STRING "27.120001"
 -- Retrieval info: PRIVATE: EXPLICIT_SWITCHOVER_COUNTER STRING "0"
 -- Retrieval info: PRIVATE: EXT_FEEDBACK_RADIO STRING "0"
 -- Retrieval info: PRIVATE: GLOCKED_COUNTER_EDIT_CHANGED STRING "1"
@@ -267,7 +267,7 @@ END SYN;
 -- Retrieval info: PRIVATE: MIRROR_CLK0 STRING "0"
 -- Retrieval info: PRIVATE: MIRROR_CLK1 STRING "0"
 -- Retrieval info: PRIVATE: MULT_FACTOR0 NUMERIC "8"
--- Retrieval info: PRIVATE: MULT_FACTOR1 NUMERIC "3"
+-- Retrieval info: PRIVATE: MULT_FACTOR1 NUMERIC "2"
 -- Retrieval info: PRIVATE: NORMAL_MODE_RADIO STRING "1"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ0 STRING "100.00000000"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ1 STRING "100.00000000"
@@ -322,7 +322,7 @@ END SYN;
 -- Retrieval info: CONSTANT: CLK0_PHASE_SHIFT STRING "0"
 -- Retrieval info: CONSTANT: CLK1_DIVIDE_BY NUMERIC "1"
 -- Retrieval info: CONSTANT: CLK1_DUTY_CYCLE NUMERIC "50"
--- Retrieval info: CONSTANT: CLK1_MULTIPLY_BY NUMERIC "3"
+-- Retrieval info: CONSTANT: CLK1_MULTIPLY_BY NUMERIC "2"
 -- Retrieval info: CONSTANT: CLK1_PHASE_SHIFT STRING "0"
 -- Retrieval info: CONSTANT: COMPENSATE_CLOCK STRING "CLK0"
 -- Retrieval info: CONSTANT: GATE_LOCK_SIGNAL STRING "NO"

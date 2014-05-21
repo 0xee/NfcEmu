@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2014-03-11
--- Last update: 2014-04-11
+-- Last update: 2014-05-14
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -38,6 +38,7 @@ entity PacketEncoder is
     inResetAsync : in  std_ulogic;
     iDin         : in  aDataPort;
     oAckIn : out std_ulogic;
+    iTs : in std_ulogic_vector(31 downto 0);
     oDout        : out std_ulogic_vector(7 downto 0);
     oEof : out std_ulogic;
     oBusy : out std_ulogic;

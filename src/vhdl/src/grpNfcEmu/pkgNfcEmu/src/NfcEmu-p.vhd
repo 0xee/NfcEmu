@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-06-16
--- Last update: 2014-05-11
+-- Last update: 2014-05-21
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ use global.Global.all;
 
 package NfcEmuPkg is
 
-  constant cNfcClkFreq : natural := 3*cNfcFc;
+  constant cNfcClkFreq : natural := 2*cNfcFc;
   constant cAdcClkFreq : natural := 8*cNfcFc;
 
 

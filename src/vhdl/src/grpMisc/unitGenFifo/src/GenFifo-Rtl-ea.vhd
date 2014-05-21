@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-12-20
--- Last update: 2014-04-04
+-- Last update: 2014-05-15
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library	global;
+library global;
 use global.Global.all;
 
 
@@ -51,26 +51,34 @@ architecture Rtl of GenFifo is
   subtype aWord is std_ulogic_vector(iDin'range);
   type aMemory is array (0 to gDepth-1) of aWord;
 
-  subtype aPointer is unsigned(LogDualis(gDepth-1) downto 0);
+  -- augmented counter uses N+1 bits for 2^N slots
+  subtype aPointer is unsigned(LogDualis(gDepth) downto 0);
 
-  signal RdPtr  : aPointer;
-  signal WrPtr  : aPointer;
+  signal RdPtr  : aPointer := (others => '0');  -- to avoid metavalue warning
+  signal WrPtr  : aPointer := (others => '0');  -- to avoid metavalue warning
   signal Memory : aMemory;
 
   signal sEmpty, sFull : std_ulogic;
-  
-  
+    
+  function CheckFull(rd : aPointer; wr : aPointer) return boolean is
+    variable vTmp : aPointer := wr;
+    begin
+      vTmp(vTmp'left) := not vTmp(vTmp'left);
+      return vTmp = rd;
+    end;
+    
 begin  -- architecture Rtl
 
   sEmpty <= '1' when WrPtr = RdPtr else
             '0';
-  sFull <= '1' when WrPtr+1 = RdPtr else
-           '0';
+  
+  sFull <=  '1' when CheckFull(WrPtr, RdPtr) else
+            '0';
 
   oAck   <= iValid and not sFull;
   oValid <= not sEmpty;
-  oDout <= Memory(to_integer(RdPtr));
-    
+  oDout  <= Memory(to_integer(RdPtr(RdPtr'left-1 downto 0)));
+
   ReadWrite : process (iClk, inResetAsync) is
   begin  -- process ReadWrite
     if inResetAsync = '0' then          -- asynchronous reset (active low)
@@ -79,8 +87,8 @@ begin  -- architecture Rtl
     elsif rising_edge(iClk) then        -- rising clock edge
       
       if iValid = '1' and sFull = '0' then
-        Memory(to_integer(WrPtr)) <= iDin;
-        WrPtr <= WrPtr + 1;
+        Memory(to_integer(WrPtr(WrPtr'left-1 downto 0))) <= iDin;
+        WrPtr                     <= WrPtr + 1;
       end if;
 
       if sEmpty = '0' and iAck = '1' then

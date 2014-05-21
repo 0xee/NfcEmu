@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-05-31
--- Last update: 2014-05-12
+-- Last update: 2014-05-15
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -55,16 +55,17 @@ architecture Rtl of TbdNfcEmu is
 
 
   -- nfc io signals
-  signal sNfcDin, sNfcDout         : aDataPortConnection;
-  
-  signal sSerialInValid, sSerialInAck : std_ulogic;
-  signal sSerialInVec                : std_ulogic_vector(sFifoDin'range);
+  signal sNfcDin, sNfcDout : aDataPortConnection;
 
+  signal sSerialInValid, sSerialInAck : std_ulogic;
+  signal sSerialInVec                 : std_ulogic_vector(sFifoDin'range);
+
+  signal sNfcTsOut : std_ulogic_vector(31 downto 0);
 
   signal sPacketEncoderBusy, sPacketOutEof, sPacketOutValid, sPacketOutAck : std_ulogic;
 
-  signal sPacketOut  : std_ulogic_vector(7 downto 0);
-  
+  signal sPacketOut : std_ulogic_vector(7 downto 0);
+
   signal sFifoDoutBundle : std_ulogic_vector(sNfcDout.DPort.Data'left+2 downto 0);
 
 
@@ -84,7 +85,8 @@ architecture Rtl of TbdNfcEmu is
 
   signal sFifoValidOutCDC, sFifoAckOutCDC : std_ulogic;
 
-  signal sNfcLoadSwitch : std_ulogic;
+  signal sNfcLoadSwitch, sTestOut : std_ulogic;
+
   
 begin
 
@@ -129,7 +131,7 @@ begin
 -- FX2 => NFC domain crossing
 -------------------------------------------------------------------------------
 
-  CDC_in: entity work.DualClockedFifo
+  CDC_in : entity work.DualClockedFifo
     generic map (
       gWidth => 8)
     port map (
@@ -142,8 +144,8 @@ begin
       oValid       => sSerialInValid,
       oDout        => sSerialInVec,
       iAck         => sSerialInAck);
-  
-  
+
+
   --CDC_in : entity misc.DcFifo
   --  generic map (
   --    gDepth => 128)
@@ -159,7 +161,7 @@ begin
   --    oDout        => sSerialInVec,
   --    iAckOut      => sSerialInAck);
 
-  PacketDecoder_1: entity misc.PacketDecoder
+  PacketDecoder_1 : entity misc.PacketDecoder
     port map (
       iClk         => sNfcClk,
       inResetAsync => snNfcReset,
@@ -168,13 +170,14 @@ begin
       oAckIn       => sSerialInAck,
       oDout        => sNfcDin.DPort,
       iAckOut      => sNfcDin.Ack);
-  
+
 
   PacketEncoder_1 : entity misc.PacketEncoder
     port map (
       iClk         => sNfcClk,
       inResetAsync => snNfcReset,
       iDin         => sNfcDout.DPort,
+      iTs          => sNfcTsOut,
       oAckIn       => sNfcDout.Ack,
       oDout        => sPacketOut,
       oEof         => sPacketOutEof,
@@ -194,7 +197,7 @@ begin
   --    rdempty => sFifoOutEmpty,
   --    wrfull  => sFifoOutFull);
 
-  CDC_out: entity work.DualClockedFifo
+  CDC_out : entity work.DualClockedFifo
     generic map (
       gWidth => 10)
     port map (
@@ -281,7 +284,7 @@ begin
       oValid       => open);
 
 
-  StrobeGen_1: entity misc.StrobeGen
+  StrobeGen_1 : entity misc.StrobeGen
     generic map (
       gClkFreq    => cNfcClkFreq,
       gStrobeFreq => cNfcFc)
@@ -291,7 +294,7 @@ begin
       iEnable      => '1',
       iSyncReset   => '0',
       oStrobe      => sEnvelopeValid);
-  
+
 
 
   NfcEmu_1 : entity nfcemu.NfcEmu
@@ -304,6 +307,7 @@ begin
 
       oDout   => sNfcDout.DPort,
       iAckOut => sNfcDout.Ack,
+      oTsOut  => sNfcTsOut,
 
       oDacOut => oDac1Out,
 
@@ -314,15 +318,15 @@ begin
       oSDacUpdate    => sSDacUpdate,
       oSDacEnableCD  => sSDacEnableCD,
       iSDacAck       => sSDacAck,
-      oNfcLoadSwitch => sNfcLoadSwitch);
+      oNfcLoadSwitch => sNfcLoadSwitch,
+      oTest => sTestOut);
 
- -- oDac1Out <= sNfcDin.Ack & sNfcDin.DPort.Data &  sNfcDin.DPort.Valid;
+  -- oDac1Out <= sNfcDin.Ack & sNfcDin.DPort.Data &  sNfcDin.DPort.Valid;
   
   oDacClk <= sNfcClk;
 
   oSecCon1 <= sNfcLoadSwitch;
-  oSecCon2 <= sFifoValidIn;
-
+  oSecCon2 <= sTestOut;
 
   SerialDac_1 : entity periph.SerialDac
     generic map (

@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-12-20
--- Last update: 2014-04-18
+-- Last update: 2014-05-15
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -44,50 +44,24 @@ entity Fifo is
 end entity Fifo;
 
 architecture Rtl of Fifo is
-
-  subtype aWord is std_ulogic_vector(cEmptyPortVec'range);
-  type aMemory is array (0 to gDepth-1) of aWord;
-
-  subtype aPointer is unsigned(LogDualis(gDepth-1) downto 0);
-
-  signal RdPtr  : aPointer := (others => '0');  -- to avoid metavalue warning
-  signal WrPtr  : aPointer := (others => '0');  -- to avoid metavalue warning
-  signal Memory : aMemory;
-
-  signal sEmpty, sFull : std_ulogic;
-  
-  
+  signal sFifoOut : std_ulogic_vector(cEmptyPortVec'range);
+  signal sFifoOutValid : std_ulogic; 
 begin  -- architecture Rtl
 
+  oDout <= ToDataPort(sFifoOut, sFifoOutValid);
 
-  sEmpty <= '1' when WrPtr = RdPtr else
-            '0';
-  sFull <= '1' when WrPtr+1 = RdPtr else
-           '0';
-
-  oAck   <= iDin.Valid and not sFull;
-
-  oDout <= ToDataPort(Memory(to_integer(RdPtr)), not sEmpty) when not sEmpty else
-           cEmptyPort;
-    
-  ReadWrite : process (iClk, inResetAsync) is
-  begin  -- process ReadWrite
-    if inResetAsync = '0' then          -- asynchronous reset (active low)
-      RdPtr <= (others => '0');
-      WrPtr <= (others => '0');
-    elsif rising_edge(iClk) then        -- rising clock edge
-      
-      if iDin.Valid = '1' and sFull = '0' then
-        Memory(to_integer(WrPtr)) <= ToSulv(iDin);
-        WrPtr <= WrPtr + 1;
-      end if;
-
-      if sEmpty = '0' and iAck = '1' then
-        RdPtr <= RdPtr + 1;
-      end if;
-      
-    end if;
-  end process ReadWrite;
-  
+  GenFifo_1: entity work.GenFifo(Rtl)
+    generic map (
+      gDepth => gDepth,
+      gWidth => sFifoOut'length)
+    port map (
+      iClk         => iClk,
+      inResetAsync => inResetAsync,
+      iDin         => ToSulv(iDin),
+      iValid       => iDin.Valid,
+      oAck         => oAck,
+      oDout        => sFifoOut,
+      oValid       => sFifoOutValid,
+      iAck         => iAck);
 
 end architecture Rtl;

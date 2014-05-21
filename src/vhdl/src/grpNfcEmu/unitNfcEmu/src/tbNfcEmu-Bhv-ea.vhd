@@ -75,6 +75,7 @@ begin  -- Bhv
       oAckIn         => sRealDin.Ack,
       oDout          => sDout.DPort,
       iAckOut        => sDout.Ack,
+      oTsOut         => open,
       oDacOut        => oDacOut,
       iEnvelope      => iEnvelope,
       iEnvelopeValid => iEnvelopeValid,
@@ -95,6 +96,7 @@ begin  -- Bhv
       oEof         => open,
       oBusy        => open,
       iAckOut      => sSerialAck,
+      iTs => (others => '0'),
       oValid       => sSerialValid);
 
 
@@ -234,13 +236,13 @@ begin  -- Bhv
 
 
     wait for 200 us;
-    SendP(x"03", cIdCpu);
-    wait for 1 ms;
-    report "-------------------- Sending command --------------------";
-    SendP(FlipBytes(x"07070707"), cIdCpu);
+    SendP(x"02", cIdCpu);
+    --wait for 100 ms;
+    --report "-------------------- Sending command --------------------";
+    --SendP(FlipBytes(x"07070707"), cIdCpu);
+    --wait;
 
 
-    wait;
     report "Feeding adc input from file";
     FeedAdcInput;
 
@@ -281,15 +283,21 @@ begin  -- Bhv
     Exp(x"08");                         -- t51 ready
 
 
-    Exp(FlipBytes(x"0003"));            -- mode ack
+    Exp(FlipBytes(x"0002"));            -- mode ack
+
+    --Exp(FlipBytes(x"0003"));            -- mode ack
+    --wait until sDout.DPort.Id = x"25";
+    --while true loop
+    --  Exp(FlipBytes(x"AABBCCDDEE"));
+    --end loop;
+    --wait until sDout.DPort.Id = x"E1";
+    --Exp(FlipBytes(x"07070707"));        -- echo test
+
 
     
-    wait until sDout.DPort.Id = x"25";
-    wait until sDout.DPort.Id = x"E1";
-      
-    Exp(FlipBytes(x"07070707"));      -- echo test
+
     sWdtReset <= not sWdtReset;
-    
+
 --    Exp(FlipBytes(x"0001"));             -- mode ack
 
     report "end of init phase";

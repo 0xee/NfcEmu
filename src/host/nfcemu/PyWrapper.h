@@ -137,6 +137,10 @@ namespace NfcEmu {
             return mpEmu->ConnectSocket(endpoint, sock, binary);
         }
 
+        bool DisconnectSocket(int const idx) {
+            return mpEmu->DisconnectSocket(idx);
+        }
+
         bool Test() {
             return mpEmu->Test();
         }

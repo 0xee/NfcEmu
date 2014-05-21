@@ -53,13 +53,14 @@ namespace NfcEmu {
         ~SocketConnection() {
             mIo.stop();
             mIoThread.join();
+            // can this be right?
             //mSocket.shutdown(asio::ip::tcp::socket::shutdown_both);
-            mSocket.close();
+            //mSocket.close();
         }
 
         bool Notify(Packet const & p) {            
             if(p.Id() == mAcceptedId) {
-                D(std::string("Local: ") + Util::FormatHex(p.GetData()));
+//                D(std::string("Local: ") + Util::FormatHex(p.GetData()));
                 auto encoded = Util::EncodeHex(p.Begin(), p.End()) + "\n";
                 mSocket.send(asio::buffer(encoded));
                 return !mStop;
@@ -77,17 +78,18 @@ namespace NfcEmu {
     private:
         void IoThreadFun() {
             mIo.run();
-        }        
+        }
 
         void RxCallback(const boost::system::error_code& error,
                         std::size_t nReceived) {
             if(!nReceived) {
                 D("Client lost");
+                mStop = true;
                 mIo.stop();
             } else {
                 boost::asio::streambuf::const_buffers_type bufs = mRxBuf.data();
                 std::string respStr(buffers_begin(bufs), buffers_begin(bufs) + nReceived);
-                D(std::string("Remote: ") + respStr);
+                //D(std::string("Remote: ") + respStr);
                 auto resp = Util::DecodeHex(respStr);
 
                 if(resp.size()) {

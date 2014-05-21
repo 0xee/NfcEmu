@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2014-04-04
--- Last update: 2014-04-18
+-- Last update: 2014-05-21
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -72,17 +72,19 @@ entity Iso14443aPicc is
     iIsoLayer4Selected  : in  std_ulogic;
 
     -- configuration
-    iUid          : in std_ulogic_vector(cUidLenDouble*8-1 downto 0);
-    iUidLenDouble : in std_ulogic
-
+    iUid          : in  std_ulogic_vector(cUidLenDouble*8-1 downto 0);
+    iUidLenDouble : in  std_ulogic;
+    oTest         : out std_ulogic
     );
 end entity Iso14443aPicc;
 
 
 architecture Rtl of Iso14443aPicc is
 
-  signal sTx, sSentTxBuffered                              : aDataPortConnection;
-  signal sRx, sRxBuffered, sLayer4Rx, sLogicDataUnbuffered : aDataPort;
+  constant cBufferSize : natural := 128;
+  
+  signal sTx, sSentTxBuffered, sUart                       : aDataPortConnection;
+  signal sRx, sRxBuffered, sLayer4Rx, sLayer4RxBuffered, sLogicDataUnbuffered : aDataPort;
 
   signal sRxShortFrame, sTxShortFrame : std_ulogic;
 
@@ -107,9 +109,11 @@ begin  -- architecture Rtl
       oBitGridIndex     => sPiccARxBgi
       );
 
+
+  -- buffers rx data for host
   RxBuffer : entity misc.Fifo(Rtl)
     generic map (
-      gDepth => 16)
+      gDepth => cBufferSize)
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,
@@ -118,9 +122,10 @@ begin  -- architecture Rtl
       oDout        => sRxBuffered,
       iAck         => iRxAck);
 
+  -- buffers logic data for host
   LogicToHostBuffer : entity misc.Fifo(Rtl)
     generic map (
-      gDepth => 16)
+      gDepth => cBufferSize)
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,
@@ -129,6 +134,7 @@ begin  -- architecture Rtl
       oDout        => oPiccLogicData,
       iAck         => iPiccLogicAck);
 
+  
   
   oRxData <= SetId(SetErrorFlag(sRxBuffered, '0'), gRxId);
 
@@ -182,10 +188,11 @@ begin  -- architecture Rtl
       iTxBits      => (others => '-'),  -- todo: remove port
       oAck         => sTx.Ack,
       oIdle        => open);
-
-  TxBuffer : entity misc.Fifo
+  
+  -- buffers tx data for host
+  TxBuffer : entity misc.Fifo(Rtl)
     generic map (
-      gDepth => 16)
+      gDepth => cBufferSize)
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,
@@ -194,12 +201,39 @@ begin  -- architecture Rtl
       oDout        => sSentTxBuffered.DPort,
       iAck         => sSentTxBuffered.Ack);
 
-  oSentTxData <= SetId(sSentTxBuffered.DPort, gTxId);
+  oSentTxData         <= SetId(sSentTxBuffered.DPort, gTxId);
   sSentTxBuffered.Ack <= iSentTxAck;
 
-  Layer4RxBuffer : entity misc.Fifo
+  -- buffers ack'd tx data for uart
+  UartBuffer : entity misc.Fifo(Rtl)
     generic map (
-      gDepth => 16)
+      gDepth => cBufferSize)
+    port map (
+      iClk         => iClk,
+      inResetAsync => inResetAsync,
+      iDin         => SetValid(sTx.DPort, sTx.Ack),
+      oAck         => open,
+      oDout        => sUart.DPort,
+      iAck         => sUart.Ack);
+
+  UartTx_1: entity misc.UartTx(Rtl)
+    generic map (
+      gClkFreq  => gClkFreq,
+      gBaudrate => 115200,
+      gDataBits => 8)
+    port map (
+      iClk         => iClk,
+      inResetAsync => inResetAsync,
+      iDin         => sUart.DPort,
+      oAckIn       => sUart.Ack,
+      oTx          => oTest);
+
+  
+
+  -- buffers layer 4 data to protocol processor
+  Layer4RxBuffer : entity misc.Fifo(Rtl)
+    generic map (
+      gDepth => cBufferSize)
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,

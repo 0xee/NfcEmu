@@ -137,9 +137,11 @@ namespace NfcEmu {
         PacketListener::Ptr pRh(new SyncResponseHandler(UnitId(unit)));
         auto pPacketPromise = dynamic_cast<SyncResponseHandler*>(pRh.get())->GetPromise();
         auto packetFuture = pPacketPromise->get_future();
+        size_t handler;
         {
             LOCK_SCOPE;
-            mExclusiveHandlers.push_front(pRh);
+            handler = NextIdx(mExclusiveHandlers);
+            mExclusiveHandlers.emplace(handler, pRh);
         }
 
         mpDev->SendPacket(*Packet::Down(UnitId(unit), packet.begin(), packet.end()));
@@ -147,7 +149,7 @@ namespace NfcEmu {
         if(timeoutMs && 
            packetFuture.wait_for(chrono::milliseconds(timeoutMs)) == future_status::timeout) { 
             LOCK_SCOPE;
-            mExclusiveHandlers.pop_front();
+            mExclusiveHandlers.erase(handler);
             throw runtime_error("Response timeout");
         }
 
@@ -162,8 +164,8 @@ namespace NfcEmu {
 
     size_t Emulator::AddLog(PacketListener::Ptr log) {
         LOCK_SCOPE;
-        size_t idx = mLogs.size();
-        mLogs[idx] = std::move(log);
+        size_t idx = NextIdx(mLogs);
+        mLogs.emplace(idx, log);
         return idx;                
     }
 
@@ -172,7 +174,7 @@ namespace NfcEmu {
         if(ofs.bad()) return -1;
         UnitId id(unit);
         
-        return AddLog(PacketListener::Ptr(new PacketLog(id, cout, false)));
+        return AddLog(PacketListener::Ptr(new PacketLog(id, ofs, false)));
     }
 
     size_t Emulator::AddDisplayLog(size_t const unit) {
@@ -182,17 +184,24 @@ namespace NfcEmu {
 
     bool Emulator::RemoveLog(size_t const logIdx) {
         LOCK_SCOPE;
-
-        if(mLogs.find(logIdx) != mLogs.end()) {
-            mLogs.erase(logIdx);
-        }
-
+        if(mLogs.find(logIdx) == mLogs.end()) return false;
+        mLogs.erase(logIdx);
+        return true;
     }
 
     int Emulator::ConnectSocket(UnitId const & endpoint, int const socket, bool const binary) {
+        LOCK_SCOPE;
         PacketListener::Ptr pSc(new SocketConnection(endpoint, *mpDev, socket));
-        mExclusiveHandlers.push_front(move(pSc));
-        return -1;
+        size_t newIdx = NextIdx(mExclusiveHandlers);
+        mExclusiveHandlers.emplace(newIdx, pSc);
+        return newIdx;
+    }
+
+    bool Emulator::DisconnectSocket(int const idx) {
+        LOCK_SCOPE;
+        if(mLogs.find(idx) == mLogs.end()) return false;
+        mExclusiveHandlers.erase(idx);
+        return true;
     }
 
 
@@ -217,9 +226,9 @@ namespace NfcEmu {
     
         while(first != last) {
             // look for a handler which accepts the packet
-            if((*first)->Notify(p)) {
+            if(first->second->Notify(p)) {
                 // check if the handler is still accepting
-                if(!(*first)->IsAccepting()) {
+                if(!first->second->IsAccepting()) {
                     mExclusiveHandlers.erase(first);
                 }
                 break;

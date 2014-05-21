@@ -158,8 +158,6 @@ end T51_RAM;
 --end;
 
 
-
-
 architecture rtl of T51_RAM is
 
 	type RAM_Image is array (2**RAMAddressWidth - 1 downto 0) of std_logic_vector(7 downto 0);
@@ -190,7 +188,7 @@ process (Clk) begin
       end if;
     end if;
     
-    if Wr = '1' then 
+    if Wr = '1' then
 		IRAMA(to_integer(unsigned(Int_AddrA_r_i))) <= DIn;
 	end if;
   end if;

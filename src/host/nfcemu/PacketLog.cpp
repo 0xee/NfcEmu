@@ -33,6 +33,52 @@ namespace NfcEmu {
             mOs << "] ";
         }
         else if(mEnableColor) mOs << cc::fore::lightgreen;
+
+        string content = FormatHex(p.Begin(), p.End());
+
+        if(p.Id().DataLocation() == UnitId::eDebug && 
+           p.Id() == UnitId::eCpu && 
+           p.GetData().size()) {
+
+            switch(*p.Begin()) {
+            case 0x07:
+                content = "CRC ERROR";
+                break;
+            case 0x09:
+                content = "ISO L4 activated";
+                break;
+            case 0x0B:
+                content = "Packet processed";
+                break;
+            case 0x0D:
+                content = "NAK received";
+                break;
+            case 0x0E:
+                content = "ISO L4 deselect";
+                break;
+            case 0x0F:
+                content = "WTX ACK";
+                break;
+            case 0xA0:
+                content = "GENERIC 0";
+                break;
+            case 0xA1:
+                content = "GENERIC 1";
+                break;
+            case 0xA2:
+                content = "GENERIC 2";
+                break;
+            case 0xA3:
+                content = "GENERIC 3";
+                break;
+
+            case 0xFF:
+                content = "ERROR";
+                break;
+
+            }
+        }
+
         // string unitText = "  ";
         // if(p.Dir() == Packet::eUp && p.IsShort() &&
         //    (p.Id().Type() == UnitId::eNfcCtrl ||
@@ -76,7 +122,7 @@ namespace NfcEmu {
             string unitText = p.Dir() == Packet::eDown ? "To " : "";
             unitText +=  p.Id().Name() + ": ";
             mOs << setw(20) << left << unitText;
-            mOs << FormatHex(p.Begin(), p.End());
+            mOs << content;
         
     
         if(mEnableColor) mOs << cc::back::console << cc::fore::console;

@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2014-03-11
--- Last update: 2014-04-23
+-- Last update: 2014-05-14
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -34,14 +34,12 @@ architecture Rtl of PacketEncoder is
   type aRegSet is record
     State    : aState;
     DleState : aDleState;
-    TsCount  : unsigned(31 downto 0);
     TsTmp    : unsigned(31 downto 0);
     TsIdx    : natural range 0 to 3;
     DataCount : unsigned(iDin.Data'range);
   end record aRegSet;
 
   constant cRegInitVal : aRegSet := (State   => Idle, DleState => Normal,
-                                     TsCount => (others => '0'),
                                      TsTmp   => (others => '0'),
                                      TsIdx   => 0,
                                      DataCount => (others => '0'));
@@ -66,19 +64,19 @@ begin  -- architecture Rtl
   Comb : process (R, iDin, iAckOut) is
   begin  -- process Comb
     NextR         <= R;
-    NextR.TsCount <= R.TsCount + 1;
     oAckIn        <= '0';
     sValidOut     <= '0';
     sDout         <= (others => '-');
     oBusy         <= '1';
     oEof          <= '0';
+
     case R.State is
       when Idle =>
         oBusy <= '0';
         if DataValid(iDin) then
           NextR.State    <= Start;
           NextR.DleState <= Normal;
-          NextR.TsTmp    <= R.TsCount;
+          NextR.TsTmp    <= unsigned(iTs);
         end if;
         
       when Start =>
@@ -98,13 +96,14 @@ begin  -- architecture Rtl
         end if;
         
       when Timestamp =>
-        sDout     <= std_ulogic_vector(R.TsTmp(R.TsIdx*8+7 downto R.TsIdx*8));
+        sDout     <= std_ulogic_vector(R.TsTmp(sDout'range));
         sValidOut <= '1';
         if iAckOut then
           if R.TsIdx = 3 then
             NextR.State    <= Data;
             NextR.DleState <= Normal;
           else
+            NextR.TsTmp <= x"00" & R.TsTmp(R.TsTmp'left downto 8);
             NextR.TsIdx <= R.TsIdx + 1;
           end if;
         end if;

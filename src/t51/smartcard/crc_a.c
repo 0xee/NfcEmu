@@ -20,6 +20,7 @@ static inline uint16_t UpdateCrc(unsigned char ch, uint16_t *lpwCrc)
 void AppendCrc(char *Data, int Length) {
     unsigned char chBlock;
     uint16_t wCrc;
+    if(Length == 0) return;
     wCrc = 0x6363; /* ITU-V.41 */
     do {
         chBlock = *Data++;

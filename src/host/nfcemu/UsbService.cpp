@@ -101,7 +101,6 @@ namespace Usb {
 
     void Service::CancelByDevice(Device & dev) {
         ScopedLock critical(Instance().mMtx);
-        //cout << "Device cancels xfer" << endl;
         auto ii = Instance().mActiveTransfers.begin(); 
         while(ii != Instance().mActiveTransfers.end()) {
             
@@ -241,6 +240,7 @@ namespace Usb {
         switch(t->status) {
 
         case LIBUSB_TRANSFER_CANCELLED:            
+            //D("     cancelled");
             Instance().mCancelSuccess = true;
             Instance().mCancelCv.notify_one();
             //cout << "transfer cancelled successfully" << endl;
@@ -248,11 +248,11 @@ namespace Usb {
             
         case LIBUSB_TRANSFER_COMPLETED:
             // expected cases
+            //D("     completed");
             if(xferDbg) cout << "transfer completed: " << t << endl;
             { 
                 auto devIter = Instance().mActiveTransfers.find(t);
                 if(devIter != Instance().mActiveTransfers.end()) {
-                    //D("transfer complete");
 
                     // TODO: handle iso transfer length
                     devIter->second->AsyncCallback(t->actual_length);
@@ -260,7 +260,9 @@ namespace Usb {
                     //cout << "destroying work object" << endl;
                     Instance().mActiveServices.erase(t); 
                     //cout << "active: " << Instance().mActiveServices.size() << endl;
-                }           
+                } else {          
+                    //D("     was cancelled before");
+                }
                 break;
             }
 

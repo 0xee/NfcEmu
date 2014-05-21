@@ -6,13 +6,13 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-06-15
--- Last update: 2014-05-11
+-- Last update: 2014-05-15
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
 -- Description:  NfcEmu main unit
---                                            sDoutSource
---     \|/                         _________       |                                  
+--                                             
+--     \|/                          _________                                     
 --      |    _____      ____     ->|-------->|--->|\                                   
 --      |   |     |    |    |   /  |         |    | \               ___________
 --       ---| ADC |-/->| HP |-/--->| PCD Rx  |--->|  |   u8        |           |       
@@ -23,40 +23,6 @@
 --                                 | Control |--->|/        |                          
 --                                 |_________|<-------------/
 --                                                                          
--------------------------------------------------------------------------------
--- Modes
--------------------------------------------------------------------------------
---
---             NFC               ACQ
---   sniffer   PCD   PICC      ADC   AM
---              |      |        |     |
---          14443-2AB  |     (clkdiv) |
---         +14443-3AB  |          (clkdiv, fc)
---           +14443-4  |
---            +7816    |
---                     |
---                  14443-2A
---                  14443-2B
---                  +14443-3
---                  +14443-4
---                   +7816
---
--- 
---  Op mode
---    nfc/acq
---  nfc  mode
---    enable picc rx/tx
---    enable pcd  rx/tx
---    sniff
---    enable standards
---      decoder flags (14443a/b,15693,7816,...)
---  acq mode
---    adc
---     fs
---    am demod
---     fs, fc
---  
---
 --
 -- 
 -------------------------------------------------------------------------------
@@ -268,15 +234,17 @@ begin  -- Rtl
   sCpuToHost.Ack        <= sHostAck(5);
   sStreamData.Ack       <= sHostAck(6);
   sDebugData.Ack        <= sHostAck(7);
+
   PacketMux_1 : entity misc.PacketMux(Rtl)
     generic map (
-      gScheduler => RoundRobin)
+      gScheduler => EarliestFirst)
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,
       iPortIn      => sToHost,
       oPortOut     => oDout,
       iAckOut      => iAckOut,
+      oTimeStamp   => oTsOut,
       oDbgSelected => open,
       oAckIn       => sHostAck);
 
@@ -408,7 +376,8 @@ begin  -- Rtl
       iLayer4TxShortFrame => sPiccATxShortFrame,
       iIsoLayer4Selected  => sPiccALayer4Selected,
       iUid                => sCfg.Uid,
-      iUidLenDouble       => sCfg.Flags(cFlagUidLenDouble));
+      iUidLenDouble       => sCfg.Flags(cFlagUidLenDouble),
+      oTest => oTest);
 
 
   Iso14443_4_1 : entity nfc.Iso14443_4(Rtl)
@@ -428,7 +397,8 @@ begin  -- Rtl
       oSelected   => sPiccALayer4Selected,
       iFwIn       => sHostToCpuFw.DPort,
       oFwAck      => sHostToCpuFw.Ack,
-      oCpuRunning => sCpuRunning);
+      oCpuRunning => sCpuRunning,
+      oCpuGpio => open);
 
 
   sLayer4Rx.Ack <= sLayer4Rx.DPort.Valid;

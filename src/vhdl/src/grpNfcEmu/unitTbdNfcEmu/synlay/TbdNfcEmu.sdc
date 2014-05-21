@@ -48,7 +48,7 @@ create_clock -name {Xtal2Clk} -period 73.746 -waveform { 0.000 36.873 } [get_por
 
 create_generated_clock -name {AdcClk} -source [get_pins {nfc_pll_1|altpll_component|pll|inclk[0]}] -duty_cycle 50.000 -multiply_by 8 -master_clock {Xtal2Clk} [get_pins {nfc_pll_1|altpll_component|pll|clk[0]}] 
 
-create_generated_clock -name {NfcClk} -source [get_pins {nfc_pll_1|altpll_component|pll|inclk[0]}] -duty_cycle 50.000 -multiply_by 3 -master_clock {Xtal2Clk} [get_pins {nfc_pll_1|altpll_component|pll|clk[1]}] 
+create_generated_clock -name {NfcClk} -source [get_pins {nfc_pll_1|altpll_component|pll|inclk[0]}] -duty_cycle 50.000 -multiply_by 2 -master_clock {Xtal2Clk} [get_pins {nfc_pll_1|altpll_component|pll|clk[1]}] 
 
 
 #**************************************************************

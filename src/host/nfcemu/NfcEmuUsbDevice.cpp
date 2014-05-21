@@ -24,10 +24,10 @@ namespace NfcEmu {
 
     UsbDevice::UsbDevice(boost::asio::io_service & io,
                    std::string const & fx2FwFile)  : Device(io), 
-                                                     fx2(io) {
+                                                     fx2(io), 
+                                                     mCanContinue(true) {
         Open(fx2FwFile);   
-        mReadBuf1.resize(512);
-        mReadBuf2.resize(512);
+        mReadBuf.resize(512);
     }
 
     bool UsbDevice::CheckFx2Fw() {
@@ -69,7 +69,7 @@ namespace NfcEmu {
     }
 
     bool UsbDevice::ResetFpga() {
-        unsigned char buf[1<<10];
+        unsigned char buf[1<<12];
         buf[0] = FX2_RESET_FPGA;
         fx2.BulkWrite(0x01, const_buffer(buf, 1));
         size_t leftOver = 0;

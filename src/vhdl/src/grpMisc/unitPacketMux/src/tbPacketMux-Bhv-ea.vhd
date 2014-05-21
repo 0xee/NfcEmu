@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2014-03-29
--- Last update: 2014-04-10
+-- Last update: 2014-05-14
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -37,18 +37,18 @@ entity tbPacketMux is
 end entity tbPacketMux;
 
 architecture Bhv of tbPacketMux is
-  constant cSources : natural := 4;
-  constant cToSend  : natural := cSources*100;
-  constant cMaxLen : natural := 32;
-  constant cClkPeriod : time := 10 ns;
+  constant cSources   : natural := 4;
+  constant cToSend    : natural := cSources*100;
+  constant cMaxLen    : natural := 32;
+  constant cClkPeriod : time    := 10 ns;
 
-  signal iClk         : std_ulogic := '1';
-  signal inResetAsync : std_ulogic;
-  signal iPortIn      : aDataPortArray(cSources-1 downto 0);
-  signal oPortOut     : aDataPort;
-  signal iAckOut      : std_ulogic;
-  signal oAckIn       : std_ulogic_vector(cSources-1 downto 0);
-
+  signal iClk                      : std_ulogic := '1';
+  signal inResetAsync              : std_ulogic;
+  signal iPortIn                   : aDataPortArray(cSources-1 downto 0);
+  signal oPortOut                  : aDataPort;
+  signal iAckOut                   : std_ulogic;
+  signal oAckIn                    : std_ulogic_vector(cSources-1 downto 0);
+  signal oTimeStamp                : std_ulogic_vector(31 downto 0);
   signal sEnableSources, sEndOfSim : std_ulogic;
   signal sSinkBusy                 : std_ulogic;
 
@@ -59,8 +59,8 @@ architecture Bhv of tbPacketMux is
   signal oPacketCount : integer_vector(cSources-1 downto 0);
 
   signal sTotalPacketCount, sRxPacketCount, sRxPacketLen, sRxBytes, sDleInRxData : integer;
-  signal sSerialOut, sId                                                    : std_ulogic_vector(7 downto 0);
-  signal sSerialAck, sSerialValid, sEncoderBusy                             : std_ulogic;
+  signal sSerialOut, sId                                                         : std_ulogic_vector(7 downto 0);
+  signal sSerialAck, sSerialValid, sEncoderBusy                                  : std_ulogic;
 
   signal sSelectedPort : natural;
 
@@ -78,11 +78,11 @@ begin  -- architecture Bhv
 
   Sources : for i in 0 to cSources-1 generate
 
-    RandomPacketSource_1 : entity misc.RandomPacketSource
+    RandomPacketSource_1 : entity misc.RandomPacketSource(Bhv)
       generic map (
-        gSeed => i,
+        gSeed        => i,
         gMaxInterval => 16*cSources*(2+i)*cMaxLen,
-        gMaxLen => cSources*(2+i)*cMaxLen)
+        gMaxLen      => cSources*(2+i)*cMaxLen)
       port map (
         iClk         => iClk,
         inInit       => inResetAsync,
@@ -99,7 +99,7 @@ begin  -- architecture Bhv
 
   sTotalPacketCount <= Sum(oPacketCount);
 
-  DUT : entity misc.PacketMux
+  DUT : entity misc.PacketMux(Rtl)
     generic map (
       gScheduler => RoundRobin)
     port map (
@@ -111,18 +111,19 @@ begin  -- architecture Bhv
       oDbgSelected => sSelectedPort,
       oAckIn       => oAckIn);
 
-  PacketEncoder_1 : entity misc.PacketEncoder
+  PacketEncoder_1 : entity misc.PacketEncoder(Rtl)
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,
       iDin         => oPortOut,
       oAckIn       => iAckOut,
+      iTs          => oTimeStamp,
       oDout        => sSerialOut,
       oBusy        => sEncoderBusy,
       iAckOut      => sSerialAck,
       oValid       => sSerialValid);
 
-  SerialPacketSink_1 : entity misc.SerialPacketSink
+  SerialPacketSink_1 : entity misc.SerialPacketSink(Bhv)
     port map (
       iClk         => iClk,
       inInit       => inResetAsync,
@@ -153,7 +154,7 @@ begin  -- architecture Bhv
 
   DistributionChecker : process (sEndOfSim, sTotalPacketCount, oPacketCount)
     constant cMinShare : natural := 40;
-    variable vMin    : natural;
+    variable vMin      : natural;
   begin
     if sEndOfSim = '1' then
       

@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-06-15
--- Last update: 2014-04-27
+-- Last update: 2014-05-21
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ begin  -- Rtl
 
   RxBuffer : entity misc.Fifo(Rtl)
     generic map (
-      gDepth => 16)
+      gDepth => 128)
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,

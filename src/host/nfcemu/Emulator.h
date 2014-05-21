@@ -82,6 +82,7 @@ namespace NfcEmu {
 
 
         int ConnectSocket(UnitId const & endpoint, int const socket, bool const binary);
+        bool DisconnectSocket(int const idx);
 
         bool Test();
         
@@ -97,14 +98,20 @@ namespace NfcEmu {
         void WriteConfig();
         void ReadConfig();
 
+        static inline size_t NextIdx(std::map<size_t, PacketListener::Ptr> & m) {
+            return m.size() == 0 
+                ? 0
+                : m.rbegin()->first + 1;
+        }
+
         boost::asio::io_service mIo;
         Device::Ptr mpDev;
-        NfcEmuConfig::Ptr mpCfg;
         std::unique_ptr<std::thread> mpWorker;
+        NfcEmuConfig::Ptr mpCfg;
         std::mutex mMtx;
 
-
-        std::list<PacketListener::Ptr> mExclusiveHandlers;
+        
+        std::map<size_t, PacketListener::Ptr> mExclusiveHandlers;
         std::map<size_t, PacketListener::Ptr> mLogs;
     };
 

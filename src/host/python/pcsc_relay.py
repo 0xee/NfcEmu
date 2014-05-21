@@ -1,9 +1,7 @@
 #!/bin/python
 
 import socket
-import array
 from smartcard.System import readers
-from smartcard.util import toHexString
 from contextlib import closing
 import sys
 
