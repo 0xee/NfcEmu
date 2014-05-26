@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-09-13
--- Last update: 2014-05-15
+-- Last update: 2014-05-26
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -109,8 +109,8 @@ architecture Rtl of Iso14443_4 is
   signal rHostPortId                : std_ulogic_vector(7 downto 0);
   signal sRxBufReset, sHostBufReset : std_ulogic;
 
-  signal sInputPorts, sOutputPorts : aDataPortArray(1 downto 0);
-  signal sInputAck, sOutputAck     : std_ulogic_vector(1 downto 0);
+  signal sInputPorts, sOutputPorts : aDataPortArray(2 downto 0);
+  signal sInputAck, sOutputAck     : std_ulogic_vector(2 downto 0);
   signal sP0Out                    : std_ulogic_vector(7 downto 0);
 
   signal rResetCrcA, sEnableCrc, sCrcEof : std_ulogic;
@@ -121,6 +121,8 @@ architecture Rtl of Iso14443_4 is
   signal sTx                    : aDataPort;
   signal rInitialized           : std_ulogic;
 
+  signal sUart : aDataPortConnection;
+  
   signal sCpuToHostBuffered : aDataPortConnection;
     
 begin  -- architecture Rtl
@@ -151,8 +153,6 @@ begin  -- architecture Rtl
 
   sEnableCrc <= sP0Out(1) and sOutputPorts(1).Valid and sOutputAck(1);
 
-  oCpuGpio <= sP0Out(0);
-  
   sCrcValidOut <= '1' when rCrcSendProgress /= 0 else
                   '0';
 
@@ -227,7 +227,7 @@ begin  -- architecture Rtl
 
   ProtocolProcessor_1 : entity nfcemu.ProtocolProcessor(Rtl)
     generic map (
-      gNrPorts => 2)
+      gNrPorts => sInputPorts'length)
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,
@@ -240,4 +240,31 @@ begin  -- architecture Rtl
       oP0          => sP0Out,
       oCpuRunning => oCpuRunning);
 
+
+  -- buffers ack'd tx data for uart
+  UartBuffer : entity misc.Fifo(Rtl)
+    generic map (
+      gDepth => 128)
+    port map (
+      iClk         => iClk,
+      inResetAsync => inResetAsync,
+      iDin         => sOutputPorts(2),
+      oAck         => sOutputAck(2),
+      oDout        => sUart.DPort,
+      iAck         => sUart.Ack);
+
+  UartTx_1: entity misc.UartTx(Rtl)
+    generic map (
+      gClkFreq  => 2*cNfcFc,
+      gBaudrate => 115200,
+      gDataBits => 8)
+    port map (
+      iClk         => iClk,
+      inResetAsync => inResetAsync,
+      iDin         => sUart.DPort,
+      oAckIn       => sUart.Ack,
+      oTx          => oCpuGpio);
+
+
+  
 end architecture Rtl;

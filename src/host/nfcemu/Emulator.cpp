@@ -166,15 +166,13 @@ namespace NfcEmu {
         LOCK_SCOPE;
         size_t idx = NextIdx(mLogs);
         mLogs.emplace(idx, log);
+        
         return idx;                
     }
 
     size_t Emulator::AddLogFile(size_t const unit, std::string const & logFile) {
-        ofstream ofs(logFile.c_str());
-        if(ofs.bad()) return -1;
-        UnitId id(unit);
-        
-        return AddLog(PacketListener::Ptr(new PacketLog(id, ofs, false)));
+        UnitId id(unit);        
+        return AddLog(PacketListener::Ptr(new PacketLog(id, logFile)));
     }
 
     size_t Emulator::AddDisplayLog(size_t const unit) {
@@ -199,7 +197,7 @@ namespace NfcEmu {
 
     bool Emulator::DisconnectSocket(int const idx) {
         LOCK_SCOPE;
-        if(mLogs.find(idx) == mLogs.end()) return false;
+        if(mExclusiveHandlers.find(idx) == mExclusiveHandlers.end()) return false;
         mExclusiveHandlers.erase(idx);
         return true;
     }
@@ -235,8 +233,6 @@ namespace NfcEmu {
             }
             ++first;
         }
-        
-
         for(auto & log : mLogs) {
             log.second->Notify(p); 
         }

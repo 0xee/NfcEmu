@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-09-22
--- Last update: 2014-05-09
+-- Last update: 2014-05-22
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -51,13 +51,6 @@ architecture Rtl of ProtocolProcessor is
   signal rWaitForAck : std_ulogic;
 
   signal sFwAck : std_ulogic;
-
-  component ROM52 is
-    port (
-      Clk : in  std_ulogic;
-      A   : in  std_ulogic_vector(11 downto 0);
-      D   : out std_ulogic_vector(7 downto 0));
-  end component ROM52;
 
   signal sOutputPorts : aDataPortArray(oOutputPorts'range);
 
@@ -108,16 +101,6 @@ begin  -- architecture Rtl
       iWbWrStb     => sWbWrStb,
       iWbRdStb     => sWbRdStb,
       oWbAck       => sWbAck);
-
-  --FwRom : if cEnableFwUpdate = false generate
-  --  ROM52_1 : entity fw.rom52(Rtl)
-  --    port map (
-  --      Clk => iClk,
-  --      A   => sRomAdr,
-  --      D   => sRomData);
-
-  --  snCpuReset <= inResetAsync;
-  --end generate FwRom;
 
   oCpuRunning <= snCpuReset;
 

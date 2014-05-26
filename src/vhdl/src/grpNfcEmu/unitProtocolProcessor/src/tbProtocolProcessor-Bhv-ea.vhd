@@ -7,7 +7,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-09-20
--- Last update: 2014-04-03
+-- Last update: 2014-05-22
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -37,14 +37,15 @@ library work;
 library fw;
 
 library nfcemu;
+use nfcemu.nfcemupkg.all;
 
 entity tbProtocolProcessor is
 
 end entity tbProtocolProcessor;
 
 architecture Bhv of tbProtocolProcessor is
-  constant gNrPorts : natural := 1;
-  
+  constant gNrPorts : natural := 2;
+
   signal iClk         : std_ulogic := '1';
   signal inResetAsync : std_ulogic := '0';
   signal iInputPorts  : aDataPortArray(gNrPorts-1 downto 0);
@@ -52,69 +53,115 @@ architecture Bhv of tbProtocolProcessor is
   signal oOutputPorts : aDataPortArray(gNrPorts-1 downto 0);
   signal iOutputAck   : std_ulogic_vector(gNrPorts-1 downto 0);
 
-  signal sOut, sIn, sFwIn       : aDataPort;
-  signal sAckIn, sAckOut, sFwAck : std_ulogic;
+  signal sCpuRunning : std_ulogic;
 
-  signal sRomAdr : std_logic_vector(11 downto 0);
+  signal sToHost, sFromHost, sFromPicc, sToPicc, sFwIn : aDataPortConnection;
+
+  signal sRomAdr  : std_logic_vector(11 downto 0);
   signal sRomData : std_logic_vector(7 downto 0);
+
+  constant cMaxPacketSize : natural := 256;
+
+  signal sFilePacket      : std_ulogic_vector(8*cMaxPacketSize-1 downto 0);
+  signal sFilePacketLen   : natural;
+  signal sFilePacketValid : std_ulogic;
+  signal sFileAck         : std_ulogic;
+
+  signal sCpuReady : std_ulogic;
+  
+  constant cClkPeriod : time := 1 sec / cNfcClkFreq;
+
   
 begin  -- architecture Bhv
 
-  iClk         <= not iClk after 5 ns;
+  iClk         <= not iClk after cClkPeriod/2;
   inResetAsync <= '1'      after 20 ns;
 
-  iInputPorts(0) <= sIn;
-  sOut           <= oOutputPorts(0);
-  iOutputAck(0)  <= sAckOut;
-  sAckIn         <= oInputAck(0);
+  iInputPorts(0) <= sFromHost.DPort;
+  sFromHost.Ack        <= oInputAck(0);
+
+  iOutputAck(0)  <= sToHost.Ack;
+  sToHost.DPort     <= oOutputPorts(0);
+
+  iInputPorts(1) <= sFromPicc.DPort;
+  sFromPicc.Ack <= oInputAck(1);
+
+  iOutputAck(1) <= sToPicc.Ack;
+  sToPicc.DPort <= oOutputPorts(1);
+  
+  LogReader_1 : entity work.LogReader(Bhv)
+    generic map (
+      gFileName      => "../sim/picc.log",
+      gMaxPacketSize => cMaxPacketSize,
+      gTsUnit        => 10 ns)
+    port map (
+      iClk         => iClk,
+      inResetAsync => inResetAsync,
+      oPacket      => sFilePacket,
+      oLen         => sFilePacketLen,
+      oValid       => sFilePacketValid,
+      iAck         => sFileAck);
+
+  sFileAck <= sFilePacketValid when rising_edge(iClk);
 
   Writer : process is
     constant cToSend : natural := 4;
   begin  -- process Writer
-    InitPort(sIn);
+    InitPort(sFromHost.DPort);
+    InitPort(sFromPicc.DPort);
 
-    wait for 200 us;
+    wait until sCpuReady;
 
-    for n in 0 to 3 loop
-      report "Sending " & integer'image(cToSend) & " bytes";
-      sIn.Valid <= '1';
-      for i in 0 to cToSend-1 loop
-        sIn.Data <= std_ulogic_vector(to_unsigned(i, 8));
-        if i = cToSend-1 then
-          sIn.Eof <= '1';
-        end if;
-        wait until rising_edge(iClk) and sAckIn = '1';
-      end loop;  -- i
-      sIn.Valid <= '0';
-      sIn.Eof   <= '0';
-      report "Packet sent";
-      wait for 100 us;
-    end loop;  -- n
+    SendPacket(sFromHost.DPort, sFromHost.Ack, iClk, x"02");
+
+    picc_packets : loop
+      wait until rising_edge(iClk) and sFilePacketValid = '1';
+      SendPacket(sFromPicc.DPort, sFromPicc.Ack, iClk, sFilePacket(sFilePacketLen-1 downto 0));
+    end loop;
+    
     wait;
   end process Writer;
 
-  sAckOut <= sOut.Valid;
+  
+  
+  sToHost.Ack <= sToHost.DPort.Valid;
 
-  Reader : process is
+  HostReader : process is
+    variable vCount : natural := 0;
+    
+  begin  -- process Reader
+    sCpuReady <= '0';
+    
+    ExpectPacket(sToHost.DPort, sToHost.Ack, FlipBytes(x"08"));
+    Info("CPU Ready");
+    sCpuReady <= '1';
+    
+    ExpectPacket(sToHost.DPort, sToHost.Ack, FlipBytes(x"0002"));
+
+    wait;
+  end process HostReader;
+
+  sToPicc.Ack <= sToPicc.DPort.Valid;
+  
+ PiccReader : process is
     variable vCount : natural := 0;
     
   begin  -- process Reader
 
-    while true loop
-      wait until rising_edge(iClk);
-      if sOut.Valid = '1' then
-        vCount := vCount + 1;
-        if sOut.Eof = '1' then
-          report "Received " & integer'image(vCount) & " bytes from id " & to_hstring(sOut.Id) severity note;
-          vCount := 0;
-        end if;
-      end if;
-    end loop;
-
+    
+    
     wait;
-  end process Reader;
+  end process PiccReader;
 
-  ProtocolProcessor_1: entity nfcemu.ProtocolProcessor
+
+
+
+
+
+  
+
+  
+  ProtocolProcessor_1 : entity nfcemu.ProtocolProcessor
     generic map (
       gNrPorts => gNrPorts)
     port map (
@@ -124,32 +171,34 @@ begin  -- architecture Bhv
       oInputAck    => oInputAck,
       oOutputPorts => oOutputPorts,
       iOutputAck   => iOutputAck,
-      iFwIn        => sFwIn,
-      oFwAck       => sFwAck);
+      iFwIn        => sFwIn.DPort,
+      oFwAck       => sFwIn.Ack,
+      oP0          => open,
+      oCpuRunning  => sCpuRunning);
 
-  sFwIn.Data <= sRomData;
-  sFwIn.Eof <= '0';
-  
-  WriteFw: process is
+  sFwIn.DPort.Data <= sRomData;
+  sFwIn.DPort.Eof  <= '0';
+
+  WriteFw : process is
     constant cRomSize : natural := 2**12;
   begin  -- process WriteFw
-    sRomAdr <= (others => '0');
-    sFwIn.Valid <= '0';
+    sRomAdr           <= (others => '0');
+    sFwIn.DPort.Valid <= '0';
     wait for 10 us;
     wait until rising_edge(iClk);
-    sFwIn.Valid <= '1';
-    
+    sFwIn.DPort.Valid <= '1';
+
     for i in 1 to cRomSize-1 loop
-      sRomAdr <= std_logic_vector(to_unsigned(i,12));
-      wait until rising_edge(iClk) and sFwAck = '1';
+      sRomAdr <= std_logic_vector(to_unsigned(i, 12));
+      wait until rising_edge(iClk) and sFwIn.Ack = '1';
     end loop;  -- i
-    wait until rising_edge(iClk) and sFwAck = '1';
-    sFwIn.Valid <= '0';
+    wait until rising_edge(iClk) and sFwIn.Ack = '1';
+    sFwIn.DPort.Valid <= '0';
     wait;
   end process WriteFw;
-  
 
-  ROM52_1: entity fw.ROM52
+
+  ROM52_1 : entity fw.ROM52(Rtl)
     port map (
       Clk => iClk,
       A   => sRomAdr,
@@ -157,7 +206,7 @@ begin  -- architecture Bhv
 
 
 
-  
+
 end architecture Bhv;
 
 

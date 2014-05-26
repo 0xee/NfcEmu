@@ -98,7 +98,7 @@ namespace NfcEmu {
         void WriteConfig();
         void ReadConfig();
 
-        static inline size_t NextIdx(std::map<size_t, PacketListener::Ptr> & m) {
+        static inline size_t NextIdx(std::map<size_t, PacketListener::Ptr> const & m) {
             return m.size() == 0 
                 ? 0
                 : m.rbegin()->first + 1;

@@ -85,7 +85,7 @@ n.OpenUsbDevice("../../vhdl/src/grpNfcEmu/unitTbdNfcEmu/synlay/TbdNfcEmu.sof")
 
 
 try:
-   # n.AddDisplayLog(Id.Any)
+    #n.AddDisplayLog(Id.Any)
 
     EchoTest(n)
     EchoCounterTest(n)

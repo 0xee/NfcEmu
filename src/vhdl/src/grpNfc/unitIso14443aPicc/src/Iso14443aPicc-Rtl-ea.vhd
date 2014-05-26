@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2014-04-04
--- Last update: 2014-05-21
+-- Last update: 2014-05-26
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -117,7 +117,8 @@ begin  -- architecture Rtl
     port map (
       iClk         => iClk,
       inResetAsync => inResetAsync,
-      iDin         => SetErrorFlag(sRx, sRxShortFrame),
+      iDin         => SetErrorFlag(sRx, sRxShortFrame),  -- logic unit accepts
+                                                         -- EVERY byte immediately
       oAck         => open,
       oDout        => sRxBuffered,
       iAck         => iRxAck);

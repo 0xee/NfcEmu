@@ -21,6 +21,8 @@ for r in rr:
     print "    " + str(r)
 
 
+respLog = open('resp.log', 'w')
+
 print "Connected to reader " + str(rr[idx])
 connection = rr[idx].createConnection()
 connection.connect()
@@ -30,7 +32,7 @@ cs.connect(('localhost', 1337))
 
 cs.send("deadbeef\n")
 
-with closing(cs.makefile()) as f: #NOTE: closed independently
+with closing(cs.makefile()) as f:
     for line in f:
         cmd = StrToList(line)
         if len(cmd) == 0:
@@ -42,5 +44,5 @@ with closing(cs.makefile()) as f: #NOTE: closed independently
         resp = ([sw1, sw2] + resp)
 
         print "RESP: " + ListToStr(resp)
-
+        respLog.write(ListToStr(resp) + '\n')
         cs.send(ListToStr(resp) + '\n')

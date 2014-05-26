@@ -27,6 +27,7 @@
 
 #include "PacketListener.h"
 #include <ostream>
+#include <fstream>
 #include "ccolor.h"
 #include <vector>
 #include "UnitId.h"
@@ -42,6 +43,15 @@ public:
                                     mEnableColor(color) {
     }
 
+    PacketLog(UnitId const & id, std::string const & fileName) : 
+        mAcceptedId(id),
+        mOs(ref(std::cout)), // temporary
+        mEnableColor(false) {
+
+        mLogFile.reset(new std::ofstream(fileName));
+        mOs = *mLogFile;
+    }
+
     virtual bool Notify(Packet const & packet);
 
 protected:
@@ -51,9 +61,9 @@ protected:
 
 private:
     UnitId mAcceptedId;
-    std::ostream & mOs;
+    std::reference_wrapper<std::ostream> mOs;
     bool mEnableColor;
-
+    std::unique_ptr<std::ofstream> mLogFile;
 
 };
 

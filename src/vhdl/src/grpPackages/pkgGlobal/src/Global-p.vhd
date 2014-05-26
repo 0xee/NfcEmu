@@ -38,13 +38,15 @@ package Global is
   function IntToVec(cN  : natural; cLen : natural) return std_ulogic_vector;
 --  function IntToVec(cN : integer; cLen : natural) return std_ulogic_vector;
 
+  procedure Info (msg : string);
+  
   function FlipBytes (
     constant cVec : std_ulogic_vector)
     return std_ulogic_vector;
   
   type aSchedulerType is (RoundRobin,   -- normal round robin w/o priorities
-                          StaticFirstOnly,   -- selects only the first
-                                             -- resource, for debugging
+                          StaticFirstOnly,  -- selects only the first
+                                            -- resource, for debugging
                           OrderedPriority,  -- selects by numerical order, not deadline safe
                           EarliestFirst);
 
@@ -104,7 +106,7 @@ package Global is
   function SetId (
     constant cPort : aDataPort;
     constant cId   : std_ulogic_vector) return aDataPort;
-
+  
   function SetIdFlags(constant cId    : in std_ulogic_vector;
                       constant cFlags : in std_ulogic_vector) return std_ulogic_vector;
 
@@ -122,12 +124,12 @@ package Global is
   procedure Send(signal sPort   : out aDataPort;
                  signal sAck    : in  std_ulogic;
                  signal sClk    : in  std_ulogic;
-                 constant cData : in  std_ulogic_vector(cDataPortWidth-1 downto 0));
+                 constant cData : in  std_ulogic_vector);
 
   procedure Send(signal sPort   : out aDataPort;
                  signal sAck    : in  std_ulogic;
                  signal sClk    : in  std_ulogic;
-                 constant cData : in  std_ulogic_vector(cDataPortWidth-1 downto 0);
+                 constant cData : in  std_ulogic_vector;
                  constant cEof  : in  boolean);
 
   procedure SendPacket(signal sPort   : out aDataPort;
@@ -377,7 +379,7 @@ package body Global is
 
 
   procedure Send(signal sPort   : out aDataPort;
-                 constant cData : in  std_ulogic_vector(cDataPortWidth-1 downto 0)) is
+                 constant cData : in  std_ulogic_vector) is
   begin
     sPort.Valid <= '1';
     sPort.error <= '0';
@@ -387,7 +389,7 @@ package body Global is
   procedure Send(signal sPort   : out aDataPort;
                  signal sAck    : in  std_ulogic;
                  signal sClk    : in  std_ulogic;
-                 constant cData : in  std_ulogic_vector(cDataPortWidth-1 downto 0);
+                 constant cData : in  std_ulogic_vector;
                  constant cEof  : in  boolean) is
   begin
 --    PrintSulv(cData);
@@ -407,7 +409,7 @@ package body Global is
   procedure Send(signal sPort   : out aDataPort;
                  signal sAck    : in  std_ulogic;
                  signal sClk    : in  std_ulogic;
-                 constant cData : in  std_ulogic_vector(cDataPortWidth-1 downto 0)) is
+                 constant cData : in  std_ulogic_vector) is
   begin
     Send(sPort, sAck, sClk, cData, false);
   end procedure;
@@ -456,7 +458,7 @@ package body Global is
 
   procedure SendDebugMsg (signal sPort  : out aDataPort;
                           constant cId  : in  aUnitId;
-                          constant cMsg :     natural range 0 to 2**8-1) is
+                          constant cMsg :     natural) is
   begin
     sPort.Data  <= std_ulogic_vector(to_unsigned(cMsg, 8));
     sPort.Valid <= '1';
@@ -524,6 +526,11 @@ package body Global is
     vId(cId'left downto cId'left-cFlags'length+1) := cFlags;
     return vId;
   end;
-  
+
+  procedure Info (msg : string) is
+  begin
+    report "------------------------- " & msg & " -------------------------";
+  end;
+
 
 end Global;

@@ -17,6 +17,7 @@ emu.OpenUsbDevice("../../vhdl/src/grpNfcEmu/unitTbdNfcEmu/synlay/TbdNfcEmu.sof")
 emu.SendIHexFile(Id.CpuFw, "../../t51/smartcard/smartcard.ihx")
 
 emu.AddDisplayLog(Id.Any)
+emu.AddLogFile(Id.Iso14443aPicc, "picc.log")
 
 
 emu.SetUnitEnable(Id.Iso14443aPicc, False)

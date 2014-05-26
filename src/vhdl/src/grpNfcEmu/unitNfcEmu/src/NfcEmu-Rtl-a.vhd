@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-06-15
--- Last update: 2014-05-15
+-- Last update: 2014-05-26
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -377,7 +377,7 @@ begin  -- Rtl
       iIsoLayer4Selected  => sPiccALayer4Selected,
       iUid                => sCfg.Uid,
       iUidLenDouble       => sCfg.Flags(cFlagUidLenDouble),
-      oTest => oTest);
+      oTest => open);
 
 
   Iso14443_4_1 : entity nfc.Iso14443_4(Rtl)
@@ -398,7 +398,7 @@ begin  -- Rtl
       iFwIn       => sHostToCpuFw.DPort,
       oFwAck      => sHostToCpuFw.Ack,
       oCpuRunning => sCpuRunning,
-      oCpuGpio => open);
+      oCpuGpio => oTest);
 
 
   sLayer4Rx.Ack <= sLayer4Rx.DPort.Valid;
