@@ -41,7 +41,7 @@ with closing(cs.makefile()) as f:
         print "CMD:  " + ListToStr(cmd)
 
         resp, sw1, sw2 = connection.transmit(cmd)
-        resp = ([sw1, sw2] + resp)
+        resp = (resp + [sw1, sw2])
 
         print "RESP: " + ListToStr(resp)
         respLog.write(ListToStr(resp) + '\n')

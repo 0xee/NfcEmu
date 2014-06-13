@@ -15,7 +15,7 @@ def EchoTest(emu):
 
     a = [0xA, 0xB, 0xC, 0xD, 0xE, 0xF]
     time.sleep(0.1)
-    for i in range(0, 1000):
+    for i in range(0, 100):
         cmd = [i/256, i%256] + a
 #        raw_input()
         resp = emu.SendCmd(Id.Cpu, cmd, 200);
@@ -37,9 +37,6 @@ def EchoCounterTest(emu):
             raise Exception("Echo Counter Test")
     
 def ReactionTest(emu):    
-    print("Testing reaction mode...")
-    emu.SendIHexFile(Id.CpuFw, "../../t51/smartcard/smartcard.ihx")
-
     class PiccChecker(threading.Thread):
         def __init__(self):
             super(PiccChecker, self).__init__()            
@@ -53,6 +50,12 @@ def ReactionTest(emu):
                     if len(ref) == 0: ref = line
                     elif line == "00\n": break
                     elif ref != line: raise Exception("Error in message stream");
+            picc.shutdown(socket.SHUT_RDWR)
+            picc.close()
+            print "end"
+
+    print("Testing reaction mode...")
+    emu.SendIHexFile(Id.CpuFw, "../../t51/smartcard/smartcard.ihx")
 
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -71,11 +74,11 @@ def ReactionTest(emu):
     emu.SendCmd(Id.Cpu, [3], 1000)
     time.sleep(0.5)
     resp = emu.SendCmd(Id.Cpu, cmd, 1000);
-    emu.DisconnectSocket(s);
     if resp != cmd: raise Exception("Reaction test")
     pc.join();
     clientsocket.close()
-
+    print "blubb"
+    emu.WaitForDisconnect(s)
 
 n = NfcEmu()
 n.OpenUsbDevice("../../vhdl/src/grpNfcEmu/unitTbdNfcEmu/synlay/TbdNfcEmu.sof")
@@ -87,8 +90,8 @@ n.OpenUsbDevice("../../vhdl/src/grpNfcEmu/unitTbdNfcEmu/synlay/TbdNfcEmu.sof")
 try:
     #n.AddDisplayLog(Id.Any)
 
-    EchoTest(n)
-    EchoCounterTest(n)
+#    EchoTest(n)
+#    EchoCounterTest(n)
     ReactionTest(n)    
     print("All tests completed successfully")
 
