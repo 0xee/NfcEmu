@@ -58,6 +58,11 @@ namespace NfcEmu {
         }
 
 
+        class Owner {
+        public:
+            virtual void HasDied(int const id) = 0;
+        };
+
     };
 
 }

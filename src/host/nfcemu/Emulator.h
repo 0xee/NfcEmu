@@ -39,7 +39,7 @@
 
 namespace NfcEmu {
 
-    class Emulator : boost::noncopyable {
+    class Emulator : boost::noncopyable, public PacketListener::Owner {
     public:
         typedef std::unique_ptr<Emulator> Ptr;
 
@@ -48,7 +48,7 @@ namespace NfcEmu {
 
 
         Emulator() : mpDev(nullptr),
-                     mpWorker(new std::thread(std::bind(&Emulator::WorkerRun, this))),
+                     mIoThread(std::bind(&Emulator::WorkerRun, this)),
                      mpCfg(new NfcEmuConfig) {
         }
 
@@ -84,6 +84,12 @@ namespace NfcEmu {
         int ConnectSocket(UnitId const & endpoint, int const socket, bool const binary);
         bool DisconnectSocket(int const idx);
 
+        bool DoesHandlerExist(int const idx);
+        
+        void HasDied(int const idx);
+
+        void WaitForDisconnect(int const idx);
+
         bool Test();
         
         void SetPiccUid(std::vector<unsigned char> const & uid);
@@ -98,6 +104,14 @@ namespace NfcEmu {
         void WriteConfig();
         void ReadConfig();
 
+        /** 
+         * Returns the next index for packet handler maps. 
+         * Indices are guaranteed to be unique
+         * 
+         * @param m A packet handler map
+         * 
+         * @return Next index for m
+         */
         static inline size_t NextIdx(std::map<size_t, PacketListener::Ptr> const & m) {
             return m.size() == 0 
                 ? 0
@@ -106,13 +120,17 @@ namespace NfcEmu {
 
         boost::asio::io_service mIo;
         Device::Ptr mpDev;
-        std::unique_ptr<std::thread> mpWorker;
         NfcEmuConfig::Ptr mpCfg;
         std::mutex mMtx;
 
         
         std::map<size_t, PacketListener::Ptr> mExclusiveHandlers;
         std::map<size_t, PacketListener::Ptr> mLogs;
+
+//        std::mutex mDisconnectMtx;
+        std::condition_variable mDisconnectCv;
+
+        std::thread mIoThread;
     };
 
 }

@@ -1,0 +1,17 @@
+<session jtag_chain="USB-Blaster [1-1.2]" jtag_device="@1: EP2C5 (0x020B10DD)" sof_file="TbdNfcEmu.sof">
+  <display_tree gui_logging_enabled="1">
+  </display_tree>
+  <mnemonics/>
+  <static_plugin_mnemonics/>
+  <global_info>
+    <single attribute="active instance" value="0"/>
+    <single attribute="config widget visible" value="1"/>
+    <single attribute="data log widget visible" value="1"/>
+    <single attribute="hierarchy widget visible" value="1"/>
+    <single attribute="instance widget visible" value="1"/>
+    <single attribute="jtag widget visible" value="1"/>
+    <multi attribute="column width" size="23" value="34,34,353,74,68,70,88,88,98,98,88,88,110,101,101,101,101,101,101,101,101,107,78"/>
+    <multi attribute="frame size" size="2" value="1680,1011"/>
+    <multi attribute="jtag widget size" size="2" value="398,141"/>
+  </global_info>
+</session>

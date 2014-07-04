@@ -21,10 +21,11 @@
 #define RX_RESET_MASK 2
 #define SHORTFRAME_MASK 4
 
-#define N_PORTS 2
+#define N_PORTS 3
  
 #define HOST 0
 #define PICC 1
+#define TRACE 2
 
 #define MY_ID 0x01
 
@@ -55,6 +56,7 @@ uint16_t GetRxCount(uint8_t const port);
 uint8_t PacketAvailable(uint8_t const port);
 
 void SendDebug(uint8_t const code);
+void Trace(uint8_t const code);
 
 
 

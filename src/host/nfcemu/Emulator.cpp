@@ -28,16 +28,18 @@
 
 using namespace Util;
 using namespace std;
+using namespace boost::asio;
 
 namespace NfcEmu {
 
     Emulator::~Emulator() {
-        ScopedLock critical(mMtx);
+        LOCK_SCOPE;
+        mExclusiveHandlers.clear();
         if(mpDev) {
             mpDev->StopReceive();
         }
         mIo.stop();
-        mpWorker->join();
+        mIoThread.join();
     }
 
     bool Emulator::OpenUsbDevice(string const & fpgaCfg) {
@@ -102,8 +104,10 @@ namespace NfcEmu {
 
     bool Emulator::SetUnitEnable(size_t const unit, bool const enable) {
         ReadConfig();        
+        //D("Config read");
         mpCfg->SetEnable(unit, enable);
         WriteConfig();
+        //D("Config written");
 
     }
 
@@ -189,8 +193,8 @@ namespace NfcEmu {
 
     int Emulator::ConnectSocket(UnitId const & endpoint, int const socket, bool const binary) {
         LOCK_SCOPE;
-        PacketListener::Ptr pSc(new SocketConnection(endpoint, *mpDev, socket));
         size_t newIdx = NextIdx(mExclusiveHandlers);
+        PacketListener::Ptr pSc(new SocketConnection(mIo, endpoint, *mpDev, socket, newIdx, *this));
         mExclusiveHandlers.emplace(newIdx, pSc);
         return newIdx;
     }
@@ -202,28 +206,57 @@ namespace NfcEmu {
         return true;
     }
 
+    bool Emulator::DoesHandlerExist(int const idx) {
+        LOCK_SCOPE;
+        return mExclusiveHandlers.find(idx) != mExclusiveHandlers.end();
+    }
+
+    void Emulator::HasDied(int const idx) {      
+        //D("has died " + to_string(idx));
+        try {
+            assert(DoesHandlerExist(idx)); // has to be called once by every handler during its lifetime
+        
+            {
+                LOCK_SCOPE;
+                mExclusiveHandlers.erase(idx);
+            }
+            mDisconnectCv.notify_one();
+        } catch(exception & e) {
+            cout << "HasDied: " << e.what() << endl;
+        }
+    }
+
+    void Emulator::WaitForDisconnect(int const idx) {
+        try {
+            ScopedLock lock(mMtx);
+            while(mExclusiveHandlers.find(idx) != mExclusiveHandlers.end()) {
+                mDisconnectCv.wait(lock);
+            }
+        } catch(exception & e) {
+            cout << "WaitForDisconnect: " << e.what() << endl;
+        }
+    }
+    
 
     bool Emulator::Test() {
     }
 
 
     void Emulator::WorkerRun() {
-        //D("WorkerRun");
         boost::asio::io_service::work work(mIo);
         mIo.run();
-        //D("WorkerRun returns");
     }
 
 
     void Emulator::PacketHandler(Packet const & p) {
         LOCK_SCOPE;
         UnitId id(p.Id().GetUnit());
-
         auto first = mExclusiveHandlers.begin();
         auto last = mExclusiveHandlers.end();
     
         while(first != last) {
             // look for a handler which accepts the packet
+            //D("Notifying " + to_string(first->first));
             if(first->second->Notify(p)) {
                 // check if the handler is still accepting
                 if(!first->second->IsAccepting()) {

@@ -25,8 +25,8 @@ map<UnitId::Flags, string> const UnitId::mFlagNames = {
     };
 map<UnitId::Id, string> const UnitId::mUnitNames = {
     {eControlReg, "ControlReg"},
-    {eCpu, "Cpu"},
-    {eCpuFw, "CpuFw"},
+    {eCpu, "CPU"},
+    {eCpuFw, "CPU FW"},
     {eEnvelopeStream, "EnvelopeStream"},
     {eTestStream, "TestStream"},
     {eIso14443aPicc, "Iso14443aPicc"},

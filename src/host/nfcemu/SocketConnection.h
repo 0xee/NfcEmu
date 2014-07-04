@@ -39,30 +39,33 @@ namespace NfcEmu {
         typedef std::vector<char> BufferType;
     public:
 
-        SocketConnection(UnitId const & accepted, 
+        SocketConnection(asio::io_service & io, 
+                         UnitId const & accepted, 
                          Device & device, 
-                         int const nativeSocket) : mAcceptedId(accepted),
-                                                   mDev(device),
-                                                   mSocket(mIo),
-                                                   mStop(false) {
+                         int const nativeSocket, 
+                         int const id,
+                         Owner & owner) : mIo(io),
+                                          mAcceptedId(accepted),
+                                          mDev(device),
+                                          mSocket(mIo),
+                                          mStop(false),
+                                          mId(id), 
+                                          mOwner(owner) {
             mSocket.assign(asio::ip::tcp::v4(), nativeSocket);
             StartReceive();
-            mIoThread = std::thread(std::bind(&SocketConnection::IoThreadFun, this));
         }
 
         ~SocketConnection() {
-            mIo.stop();
-            mIoThread.join();
-            // can this be right?
-            //mSocket.shutdown(asio::ip::tcp::socket::shutdown_both);
-            //mSocket.close();
+            //D("dtor");
+            mSocket.cancel();
+            // socket is closed on the python side
         }
 
         bool Notify(Packet const & p) {            
             if(p.Id() == mAcceptedId) {
-//                D(std::string("Local: ") + Util::FormatHex(p.GetData()));
+                D(std::string("Local: ") + Util::FormatHex(p.GetData()));
                 auto encoded = Util::EncodeHex(p.Begin(), p.End()) + "\n";
-                mSocket.send(asio::buffer(encoded));
+                Util::SendAll(mSocket, asio::buffer(encoded));
                 return !mStop;
             } else {
 //                D(std::string("rejected: ") + std::to_string(p.Id()));
@@ -74,18 +77,14 @@ namespace NfcEmu {
             return !mStop;
         }
 
-
     private:
-        void IoThreadFun() {
-            mIo.run();
-        }
 
         void RxCallback(const boost::system::error_code& error,
                         std::size_t nReceived) {
             if(!nReceived) {
                 D("Client lost");
                 mStop = true;
-                mIo.stop();
+                mOwner.HasDied(mId);
             } else {
                 boost::asio::streambuf::const_buffers_type bufs = mRxBuf.data();
                 std::string respStr(buffers_begin(bufs), buffers_begin(bufs) + nReceived);
@@ -110,10 +109,13 @@ namespace NfcEmu {
         Device & mDev;
         boost::asio::streambuf mRxBuf;
         UnitId mAcceptedId;
-        asio::io_service mIo;
+        asio::io_service & mIo;
         asio::ip::tcp::socket mSocket;
-        std::thread mIoThread;
+        
         bool mStop;
+        int mId;
+        Owner & mOwner;
+
     };
 
 

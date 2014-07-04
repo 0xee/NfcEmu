@@ -49,7 +49,6 @@ namespace NfcEmu {
         ~PyWrapper() {
             //std:: cout << "DTor called" << std::endl;
         }
-
         bool OpenUsbDevice(std::string const & fpgaConfiguration) {
             return mpEmu->OpenUsbDevice(fpgaConfiguration);
         }
@@ -135,6 +134,10 @@ namespace NfcEmu {
 
         int ConnectSocket(UnitId const & endpoint, size_t const sock, bool const binary = true) {
             return mpEmu->ConnectSocket(endpoint, sock, binary);
+        }
+
+        void WaitForDisconnect(size_t const idx) {
+            mpEmu->WaitForDisconnect(idx);
         }
 
         bool DisconnectSocket(int const idx) {

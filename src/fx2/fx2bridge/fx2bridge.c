@@ -47,7 +47,9 @@ void ResetFifos() {
 	OUTPKTEND = 0x86;  SYNCDELAY;
 
 	EP2FIFOCFG = 0x10; SYNCDELAY; //  AUTOOUT=1; byte-wide operation
-	EP6FIFOCFG = 0x0c; SYNCDELAY; //  AUTOIN=1; byte-wide operation
+	EP6FIFOCFG = 0x04; SYNCDELAY; //  AUTOIN=1; byte-wide operation
+    EP6AUTOINLENH = 1;
+    EP6AUTOINLENL = 0xFF;
 }
 
 static void Initialize(void)
@@ -64,10 +66,10 @@ static void Initialize(void)
 	REVCTL=0x03;  // See TRM...
 	SYNCDELAY;
 	
-    PORTACFG &= ~0xC0;
+    PORTACFG &= ~0xC0; SYNCDELAY;
 
-	OEA = 0x80;	// PA7 is fpga reset pin
-	IOA = 0x00;
+	OEA = 0x80; SYNCDELAY;	// PA7 is fpga reset pin
+	IOA = 0x00; SYNCDELAY;
 
 	PINFLAGSAB = 0x98;  // FLAGA = EP2 EF (empty flag); FLAGB = EP4 EF
 	SYNCDELAY;
@@ -75,18 +77,16 @@ static void Initialize(void)
 	SYNCDELAY;
 
 #if ALT_SETTING == 1
-	EP1INCFG=0xa0;		// EP1 bulk IN  
-	EP1OUTCFG=0xa0;		// EP1 bulk OUT
-	EP2CFG=0xa0;  //  (bulk OUT, 512 bytes, double-buffered)
-	EP6CFG=0xe0;  //  (bulk IN, 512 bytes, double-buffered)
+	EP1INCFG=0xa0; SYNCDELAY;		// EP1 bulk IN  
+	EP1OUTCFG=0xa0; SYNCDELAY;		// EP1 bulk OUT
+	EP2CFG=0xa0; SYNCDELAY;  //  (bulk OUT, 512 bytes, quad-buffered)
+	EP6CFG=0xe0; SYNCDELAY;  //  (bulk IN, 512 bytes, quad-buffered)
 #elif ALT_SETTING == 3
-	EP1INCFG=0xb0;		// EP1 int IN  
-	EP1OUTCFG=0xb0;		// EP1 int OUT
-	EP2CFG=0x90;  // (iso OUT, 512 bytes, double-buffered)
-	EP6CFG=0xd0;  // (iso IN, 512 bytes, double-buffered)
+	EP1INCFG=0xb0; SYNCDELAY;		// EP1 int IN  
+	EP1OUTCFG=0xb0; SYNCDELAY;		// EP1 int OUT
+	EP2CFG=0x90; SYNCDELAY;  // (iso OUT, 512 bytes, quad-buffered)
+	EP6CFG=0xd0; SYNCDELAY;  // (iso IN, 512 bytes, quad-buffered)
 #endif
-
-	SYNCDELAY;
 
     ResetFifos();
    

@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-05-31
--- Last update: 2014-05-22
+-- Last update: 2014-06-09
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -71,17 +71,12 @@ begin  -- Rtl
   sFifoDin   <= std_ulogic_vector(ioFx2Data);
   oFx2Wakeup <= '1';
 
-  oData     <= sFifoDin;
-  sFifoDout <= iData;
+  oData <= sFifoDin;
 
   onFx2WrStrobe <= not sFifoWr;
   onFx2RdStrobe <= not sFifoRd;
 
-      --onFx2PktEnd <= '0' when R.EofTimeout = 1 else
-      --               '1';   
-  
-  
-  
+
   Comb : process (R, sFifo2DataAvailable, sFifoDin, sFifo4Full, iValid, iAck, iEndOfPacket)
   begin  -- process Comb
     NextR       <= R;
@@ -92,26 +87,29 @@ begin  -- Rtl
     sFifoWr     <= '0';
     sFifoRd     <= '0';
     oFx2FifoAdr <= cEp2Adr;
-
     onFx2PktEnd <= '1';
-    
-    if R.EofTimeout /= 0 then
-      NextR.EofTimeout <= R.EofTimeout - 1;
-    end if;
+    sFifoDout   <= iData;
+
+    --if R.EofTimeout = 0 then
+    --  onFx2PktEnd      <= '0';
+    --else
+    --  NextR.EofTimeout <= R.EofTimeout - 1;
+    --end if;
 
     case R.State is
+
       when Init =>
-    --    onFx2PktEnd <= '0';
         NextR.State <= Idle;
         
       when Idle =>
         
+
         if sFifo2DataAvailable = '1' then  -- offer data to read if available
           NextR.State <= Rd;
         elsif iValid = '1' then            -- begin sending packet
           NextR.State <= Wr;
         end if;
-          
+        
         
       when Wr =>
         oFx2FifoAdr <= cEp6Adr;
@@ -121,16 +119,15 @@ begin  -- Rtl
             sFifoWr     <= '1';
             oAck        <= '1';
             if iEndOfPacket = '1' then
-              --if R.EofTimeout = 0 then
               NextR.EofTimeout <= cPacketTimeout-1;
-            --end if;
-                     onFx2PktEnd <= '0';
-              NextR.State <= Idle;
+              NextR.State      <= Idle;
+              onFx2PktEnd <= '0';
             end if;
           end if;
         else
+          --NextR.EofTimeout <= cPacketTimeout-1;
           --onFx2PktEnd <= '0';
-          NextR.State <= Idle;
+          NextR.State      <= Idle;
         end if;
         
         

@@ -79,6 +79,10 @@ void SendDebug(uint8_t const code) {
     Send(HOST, code);
 }
 
+void Trace(uint8_t const code) {
+    Send(TRACE, code);
+}
+
 
 void IfInit(void) {
     uint8_t i;

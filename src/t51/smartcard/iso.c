@@ -110,13 +110,13 @@ uint16_t apduLen;
 void IsoInit() {
     piccRx = GetRx(PICC);
     hostRx = GetRx(HOST);
-    iBlockReceived = 0;
 }
 
 void IsoProcessPcd(void) {
     uint8_t rxLen = GetRxCount(PICC);
     uint16_t crc;
-
+    Trace(0);
+    Trace(piccRx[0]);
     if(rxLen > 2) {
         crc = CalcCrc(piccRx, rxLen-2);
         if( (uint8_t)crc != piccRx[rxLen-2] || (uint8_t)(crc>>8) != piccRx[rxLen-1] ) {
@@ -151,6 +151,7 @@ void IsoProcessPcd(void) {
         switch(piccRx[0]) {
         case CMD_RATS:        
             blockNumber = 1;
+            iBlockReceived = 0;
             fsd = DECODE_FSDI(piccRx[1] >> 4);
             cid = piccRx[1] & 0x0F;
             SendAts();
@@ -204,6 +205,14 @@ static void ProcessIBlock() {
     SendPacket(HOST, ID_APDU_DOWN, piccRx+apduOffset, apduLen);
 
     ResetRx(PICC);
+
+    if(apduLen == 0) {        
+        apduBuf[0] = 0x02 | blockNumber;                      // PCB
+        apduLen = apduOffset;
+        AppendCrc(apduBuf, apduLen);  // CRC
+        SendPacket(PICC, 0, piccRx+apduOffset, apduLen);
+    }
+
     needSwtxAck = 0;
     spinCount = SWTX_INTERVAL/2;
     /* SendSwtx(); */
@@ -302,9 +311,10 @@ static void ProcessRBlock() {
 
         if((piccRx[0] & 1) == blockNumber) {
             if(iBlockReceived == 0) blockNumber ^= 1;
-            
+            SendDebug(D_GEN_0);
         } else {
-
+//            blockNumber ^= 1;
+            SendDebug(D_GEN_1);
         }
 
 
@@ -315,7 +325,7 @@ static void ProcessRBlock() {
         // retransmit last apdu?
         
         SendPacket(PICC, 0, apduBuf,  apduLen);      
-        SendDebug(D_ACK_RECEIVED);
+        //SendDebug(D_ACK_RECEIVED);
     }
     ResetRx(PICC);
 }

@@ -40,7 +40,8 @@ namespace NfcEmu {
            p.GetData().size()) {
 
             switch(*p.Begin()) {
-            case 0x07: content = "CRC ERROR"; break;
+            case 0x06: content = "Invalid packet"; break;
+            case 0x07: content = "CRC error"; break;
             case 0x09: content = "ISO L4 activated"; break;
             case 0x0B: content = "Packet processed"; break;
             case 0x0D: content = "NAK received"; break;
