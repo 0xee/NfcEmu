@@ -30,4 +30,5 @@ Features:
 Acknowledgements:
 -----------------
  
-This project uses a modified and reduced version of the T51 core from Opencores.org
+This project uses a modified and reduced version of the T51 core from Opencores.org, 
+as well as the OSVVM verification libraries
