@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-05-31
--- Last update: 2014-06-09
+-- Last update: 2014-07-21
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -90,11 +90,6 @@ begin  -- Rtl
     onFx2PktEnd <= '1';
     sFifoDout   <= iData;
 
-    --if R.EofTimeout = 0 then
-    --  onFx2PktEnd      <= '0';
-    --else
-    --  NextR.EofTimeout <= R.EofTimeout - 1;
-    --end if;
 
     case R.State is
 
@@ -103,7 +98,6 @@ begin  -- Rtl
         
       when Idle =>
         
-
         if sFifo2DataAvailable = '1' then  -- offer data to read if available
           NextR.State <= Rd;
         elsif iValid = '1' then            -- begin sending packet
@@ -127,7 +121,7 @@ begin  -- Rtl
         else
           --NextR.EofTimeout <= cPacketTimeout-1;
           --onFx2PktEnd <= '0';
-          NextR.State      <= Idle;
+          NextR.State <= Idle;
         end if;
         
         

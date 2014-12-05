@@ -19,6 +19,8 @@ use ieee.numeric_std.all;
 
 package Global is
 
+  constant cEnableDebugMessages : boolean := true;
+
   constant cIdWidth       : natural := 8;
   constant cDataPortWidth : natural := 8;
 
@@ -106,7 +108,7 @@ package Global is
   function SetId (
     constant cPort : aDataPort;
     constant cId   : std_ulogic_vector) return aDataPort;
-  
+
   function SetIdFlags(constant cId    : in std_ulogic_vector;
                       constant cFlags : in std_ulogic_vector) return std_ulogic_vector;
 
@@ -460,12 +462,12 @@ package body Global is
                           constant cId  : in  aUnitId;
                           constant cMsg :     natural) is
   begin
-    sPort.Data  <= std_ulogic_vector(to_unsigned(cMsg, 8));
-    sPort.Valid <= '1';
-    sPort.Eof   <= '1';
---    sPort.ShortFrame <= '1';
+    if cEnableDebugMessages then
+      sPort.Data  <= std_ulogic_vector(to_unsigned(cMsg, 8));
+      sPort.Valid <= '1';
+      sPort.Eof   <= '1';
+    end if;
   end;
-
 
   function FlipBytes (
     constant cVec : std_ulogic_vector)

@@ -63,7 +63,7 @@ namespace NfcEmu {
 
         bool Notify(Packet const & p) {            
             if(p.Id() == mAcceptedId) {
-                D(std::string("Local: ") + Util::FormatHex(p.GetData()));
+                //D(std::string("Local: ") + Util::FormatHex(p.GetData()));
                 auto encoded = Util::EncodeHex(p.Begin(), p.End()) + "\n";
                 Util::SendAll(mSocket, asio::buffer(encoded));
                 return !mStop;
@@ -82,13 +82,13 @@ namespace NfcEmu {
         void RxCallback(const boost::system::error_code& error,
                         std::size_t nReceived) {
             if(!nReceived) {
-                D("Client lost");
+                //D("Client lost");
                 mStop = true;
                 mOwner.HasDied(mId);
             } else {
                 boost::asio::streambuf::const_buffers_type bufs = mRxBuf.data();
                 std::string respStr(buffers_begin(bufs), buffers_begin(bufs) + nReceived);
-                //D(std::string("Remote: ") + respStr);
+                D(std::string("Remote: ") + respStr);
                 auto resp = Util::DecodeHex(respStr);
 
                 if(resp.size()) {

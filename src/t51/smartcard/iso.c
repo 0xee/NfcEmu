@@ -267,7 +267,7 @@ static void ProcessIBlock() {
             --spinCount;
 
             if(PacketAvailable(HOST)) {  // host sent (last part of) response
-                //   SendPacket(HOST, ID_DEBUG, GetRx(HOST), GetRxCount(HOST));
+                //SendPacket(HOST, ID_DEBUG, GetRx(HOST), GetRxCount(HOST));
                 apduBuf[0] = 0x02 | blockNumber;                      // PCB
                 apduLen = GetRxCount(HOST);
                 memcpy(apduBuf+apduOffset, hostRx, apduLen); // APDU data

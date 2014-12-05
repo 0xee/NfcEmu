@@ -200,6 +200,8 @@ namespace NfcEmu {
     }
 
     bool Emulator::DisconnectSocket(int const idx) {
+        D("disconnect " + to_string(idx));
+        assert(DoesHandlerExist(idx)); // has to be called once by every handler during its lifetime
         LOCK_SCOPE;
         if(mExclusiveHandlers.find(idx) == mExclusiveHandlers.end()) return false;
         mExclusiveHandlers.erase(idx);
@@ -212,15 +214,13 @@ namespace NfcEmu {
     }
 
     void Emulator::HasDied(int const idx) {      
-        //D("has died " + to_string(idx));
         try {
-            assert(DoesHandlerExist(idx)); // has to be called once by every handler during its lifetime
         
             {
                 LOCK_SCOPE;
-                mExclusiveHandlers.erase(idx);
+                 mExclusiveHandlers.erase(idx);
             }
-            mDisconnectCv.notify_one();
+             mDisconnectCv.notify_one();
         } catch(exception & e) {
             cout << "HasDied: " << e.what() << endl;
         }
@@ -229,8 +229,9 @@ namespace NfcEmu {
     void Emulator::WaitForDisconnect(int const idx) {
         try {
             ScopedLock lock(mMtx);
+        
             while(mExclusiveHandlers.find(idx) != mExclusiveHandlers.end()) {
-                mDisconnectCv.wait(lock);
+                 mDisconnectCv.wait(lock);
             }
         } catch(exception & e) {
             cout << "WaitForDisconnect: " << e.what() << endl;

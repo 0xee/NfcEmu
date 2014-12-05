@@ -35,7 +35,6 @@ while True:
     print "client connected"
 
     uid = GetUid(clientsocket.makefile())
-    print uid
     
     emu.SetPiccUid(uid)
     emu.SetUnitEnable(Id.Iso14443aPicc, True)

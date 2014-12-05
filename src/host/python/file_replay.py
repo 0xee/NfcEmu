@@ -19,8 +19,9 @@ else:
 
 replayFile = open(fileName)
 
-uid = replayFile.readline().upper()
-print "UID: "
+uid = replayFile.readline()
+uid = uid.split('#')[0].strip().upper() + '\n'
+print "UID: " + uid
 
 cmdMap = dict()
 

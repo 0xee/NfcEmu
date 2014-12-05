@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-08-10
--- Last update: 2014-05-06
+-- Last update: 2014-07-18
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -30,8 +30,8 @@ package Iso14443 is
 
   -- states of a type A PICC
   -- (PowerOff is not currently not implemented - necessary?)
-  type aPiccState is (PowerOff, Idle, Anticol, Ready, Layer4, Halt);
-  type aPiccWakeupState is (WaitForREQA, SendATQA);
+  type aPiccState is (PowerOff, Idle, Ready, Layer4, Halt);
+  type aPiccWakeupState is (WaitForWakeup, SendATQA);
   type aPiccAnticolState is (WaitForSEL, WaitForNVB, SelectCheckUid, SendUid, SendBCC, SendSAK);
   subtype aPiccHaltState is natural range 0 to 3;
 

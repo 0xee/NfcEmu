@@ -6,7 +6,7 @@
 -- Author     : Lukas Schuller  <l.schuller@gmail.com>
 -- Company    : 
 -- Created    : 2013-08-10
--- Last update: 2014-05-06
+-- Last update: 2014-07-21
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ architecture Rtl of Iso14443aPiccLogic is
   end record;
   
   constant cRegInitVal : aRegSet := (PiccState    => PowerOff,
-                                     WakeupState  => WaitForREQA,
+                                     WakeupState  => WaitForWakeup,
                                      AnticolState => WaitForSel,
                                      HaltState    => 0,
                                      ByteCount    => 0,
@@ -114,7 +114,7 @@ begin  -- Rtl
   oTxShortFrame <= '0';                 -- TODO!
 
   Comb : process (R, iRxData, iBitGridIdx, iCyclesToBitStart, iFieldActive, iEnable, iTxAck, iUid, iUidLenDouble, sCrcA, iLayer4TxData, iIsoLayer4Selected, iRxShortFrame, iLayer4TxShortFrame) is
-
+    
     procedure AlignTxToBitGrid(constant cMinBitsToWait : in natural) is
     begin
       if (VecToInt(iBitGridIdx) >= cMinBitsToWait-1 and
@@ -149,13 +149,49 @@ begin  -- Rtl
           when PowerOff =>
             if iFieldActive = '1' then
               NextR.PiccState   <= Idle;
-              NextR.WakeupState <= WaitForREQA;
+              NextR.WakeupState <= WaitForWakeup;
+              NextR.ByteCount   <= 0;
               SendDebugMsg(oHostData, cStatusId, cPiccPowerOn);
             end if;
-          when Idle =>
             
+          when Idle =>
             case R.WakeupState is
-              when WaitForREQA =>
+              when WaitForWakeup =>
+                if iRxData.Valid = '1' then
+                  if iRxData.Data = cREQA or iRxData.Data = cWUPA then
+                    NextR.WakeupState <= SendATQA;
+                    NextR.ByteCount   <= 0;
+                  end if;
+                end if;
+                
+              when SendATQA =>
+                if R.ByteCount = 0 then
+                  sTxData.Data <= cATQA1;
+                  AlignTxToBitGrid(cAnticolFrameDelay);
+                  if iTxAck = '1' then
+                    NextR.ByteCount <= 1;
+                  end if;
+                else
+                  sTxData.Data  <= cATQA2;
+                  sTxData.Valid <= '1';
+
+                  if iTxAck = '1' then
+                    sTxData.Eof        <= '1';
+                    NextR.PiccState    <= Ready;
+                    NextR.HaltState <= 0;
+                    NextR.WakeupState  <= WaitForWakeup;
+                    SendDebugMsg(oHostData, cLogicId, cPiccIsReady);
+                    NextR.AnticolState <= WaitForSel;
+                  end if;
+                  
+                end if;
+
+              when others => null;
+            end case;
+
+          when Ready =>
+            case R.WakeupState is
+              when WaitForWakeup =>
                 if iRxData.Valid = '1' then
                   if iRxData.Data = cREQA or iRxData.Data = cWUPA then
                     NextR.WakeupState <= SendATQA;
@@ -186,7 +222,21 @@ begin  -- Rtl
               when others => null;
             end case;
 
-          when Ready =>
+            if iRxData.Valid = '1' then
+              if iRxData.Data = cHLTA(R.HaltState) then
+                if R.HaltState = aPiccHaltState'right then
+                  NextR.WakeupState <= WaitForWakeup;
+                  NextR.PiccState   <= Halt;
+                  SendDebugMsg(oHostData, cLogicId, cPiccHalted);
+                else
+                  NextR.HaltState <= R.HaltState + 1;
+                end if;
+              else
+                NextR.HaltState <= 0;
+              end if;
+            end if;
+
+
             case R.AnticolState is
               
               when WaitForSEL =>
@@ -298,11 +348,11 @@ begin  -- Rtl
             if iLayer4TxData.Data = x"04" and
               iLayer4TxShortFrame = '1' and iTxAck = '1' then
               NextR.PiccState   <= Idle;
-              NextR.WakeupState <= WaitForREQA;
+              NextR.WakeupState <= WaitForWakeup;
               SendDebugMsg(oHostData, cLogicId, cIsoL4Deactivated);
               NextR.ByteCount   <= 0;
             end if;
-            -- make sure that the beginning of the frames are bit-aligned
+            -- make sure that the beginning of the response frames are bit-aligned
             if R.ByteCount = 0 then
               sTxData.Valid <= '0';
               if iLayer4TxData.Valid = '1' then
@@ -320,22 +370,55 @@ begin  -- Rtl
             -- we may receive HLTA
             if iIsoLayer4Selected = '0' then
               
-              if iRxData.Valid = '1' and iRxData.Data = cHLTA(R.HaltState) then
-                if R.HaltState = aPiccHaltState'right then
-                  NextR.WakeupState <= WaitForREQA;
-                  NextR.PiccState   <= Idle;
-                  SendDebugMsg(oHostData, cLogicId, cPiccHalted);
+              if iRxData.Valid = '1' then
+                if iRxData.Data = cHLTA(R.HaltState) then
+                  if R.HaltState = aPiccHaltState'right then
+                    NextR.WakeupState <= WaitForWakeup;
+                    NextR.PiccState   <= Halt;
+                    SendDebugMsg(oHostData, cLogicId, cPiccHalted);
+                  else
+                    NextR.HaltState <= R.HaltState + 1;
+                  end if;
                 else
-                  NextR.HaltState <= R.HaltState + 1;
+                  NextR.HaltState <= 0;
                 end if;
               end if;
 
             end if;
 
           when Halt =>
-            NextR.PiccState   <= Idle;
-            NextR.WakeupState <= WaitForREQA;
-          when others => null;
+            case R.WakeupState is
+              when WaitForWakeup =>
+                if iRxData.Valid = '1' then
+                  if iRxData.Data = cWUPA then
+                    NextR.WakeupState <= SendATQA;
+                    NextR.ByteCount   <= 0;
+                  end if;
+                end if;
+                
+              when SendATQA =>
+                if R.ByteCount = 0 then
+                  sTxData.Data <= cATQA1;
+                  AlignTxToBitGrid(cAnticolFrameDelay);
+                  if iTxAck = '1' then
+                    NextR.ByteCount <= 1;
+                  end if;
+                else
+                  sTxData.Data  <= cATQA2;
+                  sTxData.Valid <= '1';
+
+                  if iTxAck = '1' then
+                    sTxData.Eof        <= '1';
+                    NextR.PiccState    <= Ready;
+                    NextR.WakeupState  <= WaitForWakeup;
+                    SendDebugMsg(oHostData, cLogicId, cPiccIsReady);
+                    NextR.AnticolState <= WaitForSel;
+                  end if;
+                  
+                end if;
+
+              when others => null;
+            end case;
         end case;
 
       end if;

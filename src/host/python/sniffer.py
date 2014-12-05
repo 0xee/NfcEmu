@@ -4,13 +4,11 @@ import time
 
 from nfcemu import *
 
-
 emu = NfcEmu()
 
 emu.OpenUsbDevice("../../vhdl/src/grpNfcEmu/unitTbdNfcEmu/synlay/TbdNfcEmu.sof")
 
 emu.AddDisplayLog(Id.Any)
-
 emu.SetFlag(0, 1);
 emu.SetUnitEnable(Id.Iso14443aPicc, 1)
 emu.SetUnitEnable(Id.Iso14443aPcd, 1)
